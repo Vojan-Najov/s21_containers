@@ -16,4 +16,4 @@ Implementation of the s21_containers.h. library. List of classes: list, map, que
 - [Instructions for testing EN](./materials/instructions_for_testing.md)
 - [Instructions for testing RU](./materials/instructions_for_testing_rus.md)
 
-<img src="./materials/STL_UML.png" alt="stl_uml" width="700"/>
+<img src="./materials/STL_UML.png" alt="stl_uml" width="900"/>
