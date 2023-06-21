@@ -7,6 +7,10 @@ Implementation of the s21_containers.h. library. List of classes: list, map, que
 - [Subject EN](./subject_en.md)
 - [Subject RU](./subject_ru.md)
 
+## Solution
+
+- [array](./include/array.h)
+
 ## Materials.
 
 - [Containers info EN](./materials/containers_info.md)
