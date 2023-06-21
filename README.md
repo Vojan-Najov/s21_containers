@@ -9,7 +9,7 @@ Implementation of the s21_containers.h. library. List of classes: list, map, que
 
 ## Solution
 
-- [array](./include/array.h)
+- [array](./include/s21_array.h)
 
 ## Materials.
 
