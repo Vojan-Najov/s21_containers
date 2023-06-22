@@ -13,8 +13,6 @@ template <typename T, std::size_t N>
 class array {
  public:
   typedef T value_type;
-  typedef value_type* pointer;
-  typedef const value_type* const_pointer;
   typedef value_type& reference;
   typedef const value_type& const_reference;
   typedef value_type* iterator;
@@ -22,7 +20,7 @@ class array {
   typedef std::size_t size_type;
 
   array(void);
-  // array(std::initializer_list<value_type> const &items);
+  array(const std::initializer_list<value_type>& items);
   array(const array& other);
   array(array&& other);
   array& operator=(const array& a);
@@ -56,12 +54,32 @@ class array {
   value_type elements_[N];
 };
 
+// Constructors, destructor and overloading operator=.
+
 template <typename T, std::size_t N>
 array<T, N>::array(void) {}
 
 template <typename T, std::size_t N>
+array<T, N>::array(std::initializer_list<T> const& items) {
+  if (items.size() > N) {
+    throw std::out_of_range("array::initilized_constructor out of range");
+  }
+
+  iterator it = begin();
+  for (value_type item : items) {
+    *it = item;
+    ++it;
+  }
+  while (it != end()) {
+    *it = value_type();
+    ++it;
+  }
+}
+
+template <typename T, std::size_t N>
 array<T, N>::array(const array<T, N>& other) {
   // std::copy_n(elelements_, N, other.elements_);
+  // operator=(other);
   for (size_t i = 0; i < N; ++i) {
     elements_[i] = other.elements_[i];
   }
@@ -96,59 +114,7 @@ array<T, N>& array<T, N>::operator=(array<T, N>&& other) {
 template <typename T, std::size_t N>
 array<T, N>::~array(void) {}
 
-template <typename T, std::size_t N>
-void array<T, N>::fill(array<T, N>::const_reference value) {
-  // std::fill_n(elements_, n, value);
-  for (size_t i = 0; i < N; ++i) {
-    elements_[i] = value;
-  }
-}
-
-template <typename T, std::size_t N>
-void array<T, N>::swap(array<T, N>& other) {
-  // std::swap_ranges(elements_, elements_ + N, other.elements_);
-  for (size_t i = 0; i < N; ++i) {
-    std::swap(elements_, other.elements_);
-  }
-}
-
-template <typename T, std::size_t N>
-inline typename array<T, N>::iterator array<T, N>::begin(void) noexcept {
-  return iterator(elements_);
-}
-
-template <typename T, std::size_t N>
-inline typename array<T, N>::const_iterator array<T, N>::begin(
-    void) const noexcept {
-  return const_iterator(elements_);
-}
-
-template <typename T, std::size_t N>
-inline typename array<T, N>::iterator array<T, N>::end(void) noexcept {
-  return iterator(elements_ + N);
-}
-
-template <typename T, std::size_t N>
-inline typename array<T, N>::const_iterator array<T, N>::end(
-    void) const noexcept {
-  return const_iterator(elements_ + N);
-}
-
-template <typename T, std::size_t N>
-inline typename array<T, N>::size_type array<T, N>::size(void) const noexcept {
-  return N;
-}
-
-template <typename T, std::size_t N>
-inline typename array<T, N>::size_type array<T, N>::max_size(
-    void) const noexcept {
-  return N;
-}
-
-template <typename T, std::size_t N>
-inline bool array<T, N>::empty(void) const noexcept {
-  return N == 0;
-}
+// Array element's access.
 
 template <typename T, std::size_t N>
 inline typename array<T, N>::reference array<T, N>::at(
@@ -214,6 +180,67 @@ inline typename array<T, N>::const_iterator array<T, N>::data(
     void) const noexcept {
   return const_iterator(elements_);
 }
+
+// Array iterators.
+
+template <typename T, std::size_t N>
+inline typename array<T, N>::iterator array<T, N>::begin(void) noexcept {
+  return iterator(elements_);
+}
+
+template <typename T, std::size_t N>
+inline typename array<T, N>::const_iterator array<T, N>::begin(
+    void) const noexcept {
+  return const_iterator(elements_);
+}
+
+template <typename T, std::size_t N>
+inline typename array<T, N>::iterator array<T, N>::end(void) noexcept {
+  return iterator(elements_ + N);
+}
+
+template <typename T, std::size_t N>
+inline typename array<T, N>::const_iterator array<T, N>::end(
+    void) const noexcept {
+  return const_iterator(elements_ + N);
+}
+
+// Array capacity
+
+template <typename T, std::size_t N>
+inline typename array<T, N>::size_type array<T, N>::size(void) const noexcept {
+  return N;
+}
+
+template <typename T, std::size_t N>
+inline typename array<T, N>::size_type array<T, N>::max_size(
+    void) const noexcept {
+  return N;
+}
+
+template <typename T, std::size_t N>
+inline bool array<T, N>::empty(void) const noexcept {
+  return N == 0;
+}
+
+// Array modifiers
+
+template <typename T, std::size_t N>
+void array<T, N>::swap(array<T, N>& other) {
+  // std::swap_ranges(elements_, elements_ + N, other.elements_);
+  for (size_t i = 0; i < N; ++i) {
+    std::swap(elements_, other.elements_);
+  }
+}
+
+template <typename T, std::size_t N>
+void array<T, N>::fill(array<T, N>::const_reference value) {
+  // std::fill_n(elements_, n, value);
+  for (size_t i = 0; i < N; ++i) {
+    elements_[i] = value;
+  }
+}
+
 }  // namespace s21
 
 #endif  // INCLUDE_S21_ARRAY_H_
