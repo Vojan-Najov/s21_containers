@@ -119,7 +119,7 @@ class list {
   void splice(const_iterator pos, list&  other);
   void reverse(void);
   void unique(void);
-  //void sort(void);
+  void sort(void);
 
  private:
   ListNode<T> *head_;
@@ -127,7 +127,7 @@ class list {
  private:
   ListNode<T> *CreateNode(ListNode<T> *prev, ListNode<T> *next, const T& value);
   void DestroyNode(ListNode<T> *node);
-  void TransferNode(ListNode<T> *pos, ListNode<T> *node);
+  void transfer(iterator position, iterator first, iterator last);
 };
 
 // Auxiliary private member function for work with nodes.
@@ -154,12 +154,19 @@ void list<T>::DestroyNode(ListNode<T> *node) {
   operator delete (static_cast<void *>(node));
 }
 
-/*
-template<typename T>
-void list<T>::TransferNode(ListNode<T> *pos, ListNode<T> *node) {
-  
+template <typename T>
+void list<T>::transfer(iterator position, iterator first, iterator last) {
+  if (position != last) {
+    last.node_->prev->next = position.node_;
+    first.node_->prev->next = last.node_;
+    position.node_->prev->next = first.node_;
+
+    ListNode<T> *tmp = position.node_->prev;
+    position.node_->prev = last.node_->prev;
+    last.node_->prev = first.node_->prev;
+    first.node_->prev = tmp;
+  }
 }
-*/
 
 // Ctors, Dtor, overloading operator=
 
@@ -447,6 +454,35 @@ void list<T>::unique(void) {
     }
     node = node->next;
   }
+}
+
+template<typename T>
+void list<T>::sort(void) {
+  if (head_ == head_->next || head_->next->next == head_) {
+    return;
+  }
+
+  list<T> hooks[64];
+  list<T> carry;
+  int fill = 0;
+  while (!empty()) {
+    carry.transfer(carry.begin(), begin(), ++begin());
+    int i = 0;
+    while (i < fill && !hooks[i].empty()) {
+      hooks[i].merge(carry);
+      carry.swap(hooks[i]);
+      ++i;
+    }
+    carry.swap(hooks[i]);
+    if (i == fill) {
+      ++fill;
+    }
+  }
+
+  for (int i = 1; i < fill; ++i) {
+    hooks[i].merge(hooks[i-1]);
+  }
+  swap(hooks[fill - 1]);
 }
 
 } // namespace s21
