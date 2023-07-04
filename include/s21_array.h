@@ -3,13 +3,14 @@
 #ifndef INCLUDE_S21_ARRAY_H_
 #define INCLUDE_S21_ARRAY_H_
 
+#include <algorithm>
 #include <cstddef>
 #include <stdexcept>
 #include <utility>
 
 namespace s21 {
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 class array {
  public:
   typedef T value_type;
@@ -17,8 +18,9 @@ class array {
   typedef const value_type& const_reference;
   typedef value_type* iterator;
   typedef const value_type* const_iterator;
-  typedef std::size_t size_type;
+  typedef size_t size_type;
 
+ public:
   array(void);
   array(const std::initializer_list<value_type>& items);
   array(const array& other);
@@ -27,6 +29,7 @@ class array {
   array& operator=(array&& other);
   ~array(void);
 
+ public:
   reference at(size_type pos);
   const_reference at(size_type pos) const;
   reference operator[](size_type pos) noexcept;
@@ -38,16 +41,19 @@ class array {
   iterator data(void) noexcept;
   const_iterator data(void) const noexcept;
 
+ public:
   iterator begin(void) noexcept;
-  const_iterator begin(void) const noexcept;
   iterator end(void) noexcept;
-  const_iterator end(void) const noexcept;
+  const_iterator cbegin(void) const noexcept;
+  const_iterator cend(void) const noexcept;
 
+ public:
   bool empty(void) const noexcept;
   size_type size(void) const noexcept;
   size_type max_size(void) const noexcept;
 
-  void swap(array& other);
+ public:
+  void swap(array& other) noexcept;
   void fill(const_reference value);
 
  private:
@@ -56,67 +62,49 @@ class array {
 
 // Constructors, destructor and overloading operator=.
 
-template <typename T, std::size_t N>
-array<T, N>::array(void) {}
+template <typename T, size_t N>
+array<T, N>::array(void) : elements_() {}
 
-template <typename T, std::size_t N>
-array<T, N>::array(std::initializer_list<T> const& items) {
+template <typename T, size_t N>
+array<T, N>::array(std::initializer_list<T> const& items) : elements_() {
   if (items.size() > N) {
     throw std::out_of_range("array::initilized_constructor out of range");
   }
 
   iterator it = begin();
   for (value_type item : items) {
-    *it = item;
-    ++it;
-  }
-  while (it != end()) {
-    *it = value_type();
-    ++it;
+    *it++ = item;
   }
 }
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 array<T, N>::array(const array<T, N>& other) {
-  // std::copy_n(elelements_, N, other.elements_);
-  // operator=(other);
-  for (size_t i = 0; i < N; ++i) {
-    elements_[i] = other.elements_[i];
-  }
+  std::copy_n(other.elements_, N, elements_);
 }
 
-template <typename T, std::size_t N>
-array<T, N>::array(array<T, N>&& other) {
-  // std::swap_ranges(elements_, elements_ + N, other.elements_);
-  // std::swap(elemets_, other.elements_);
-  for (size_t i = 0; i < N; ++i) {
-    std::swap(elements_, other.elements_);
-  }
+template <typename T, size_t N>
+array<T, N>::array(array<T, N>&& other) : elements_() {
+  std::swap(elements_, other.elements_);
 }
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 array<T, N>& array<T, N>::operator=(const array<T, N>& other) {
-  // std::copy_n(elelements_, N, other.elements_);
-  for (size_t i = 0; i < N; ++i) {
-    elements_ = other.elements_;
-  }
+  std::copy_n(other.elements_, N, elements_);
+  return *this;
 }
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 array<T, N>& array<T, N>::operator=(array<T, N>&& other) {
-  // std::swap_ranges(elements_, elements_ + N, other.elements_);
-  // std::swap(elemets_, other.elements_);
-  for (size_t i = 0; i < N; ++i) {
-    std::swap(elements_, other.elements_);
-  }
+  std::swap(elements_, other.elements_);
+  return *this;
 }
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 array<T, N>::~array(void) {}
 
 // Array element's access.
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 inline typename array<T, N>::reference array<T, N>::at(
     typename array<T, N>::size_type n) {
   if (n >= N) {
@@ -126,7 +114,7 @@ inline typename array<T, N>::reference array<T, N>::at(
   return elements_[n];
 }
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 inline typename array<T, N>::const_reference array<T, N>::at(
     typename array<T, N>::size_type n) const {
   if (n >= N) {
@@ -136,46 +124,46 @@ inline typename array<T, N>::const_reference array<T, N>::at(
   return elements_[n];
 }
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 inline typename array<T, N>::reference array<T, N>::operator[](
     typename array<T, N>::size_type n) noexcept {
   return elements_[n];
 }
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 inline typename array<T, N>::const_reference array<T, N>::operator[](
     typename array<T, N>::size_type n) const noexcept {
   return elements_[n];
 }
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 inline typename array<T, N>::reference array<T, N>::front(void) noexcept {
   return elements_[0];
 }
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 inline typename array<T, N>::const_reference array<T, N>::front(
     void) const noexcept {
   return elements_[0];
 }
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 inline typename array<T, N>::reference array<T, N>::back(void) noexcept {
   return elements_[N - 1];
 }
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 inline typename array<T, N>::const_reference array<T, N>::back(
     void) const noexcept {
   return elements_[N - 1];
 }
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 inline typename array<T, N>::iterator array<T, N>::data(void) noexcept {
   return iterator(elements_);
 }
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 inline typename array<T, N>::const_iterator array<T, N>::data(
     void) const noexcept {
   return const_iterator(elements_);
@@ -183,62 +171,56 @@ inline typename array<T, N>::const_iterator array<T, N>::data(
 
 // Array iterators.
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 inline typename array<T, N>::iterator array<T, N>::begin(void) noexcept {
   return iterator(elements_);
 }
 
-template <typename T, std::size_t N>
-inline typename array<T, N>::const_iterator array<T, N>::begin(
+template <typename T, size_t N>
+inline typename array<T, N>::const_iterator array<T, N>::cbegin(
     void) const noexcept {
   return const_iterator(elements_);
 }
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 inline typename array<T, N>::iterator array<T, N>::end(void) noexcept {
   return iterator(elements_ + N);
 }
 
-template <typename T, std::size_t N>
-inline typename array<T, N>::const_iterator array<T, N>::end(
+template <typename T, size_t N>
+inline typename array<T, N>::const_iterator array<T, N>::cend(
     void) const noexcept {
   return const_iterator(elements_ + N);
 }
 
 // Array capacity
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 inline typename array<T, N>::size_type array<T, N>::size(void) const noexcept {
   return N;
 }
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 inline typename array<T, N>::size_type array<T, N>::max_size(
     void) const noexcept {
   return N;
 }
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 inline bool array<T, N>::empty(void) const noexcept {
   return N == 0;
 }
 
 // Array modifiers
 
-template <typename T, std::size_t N>
-void array<T, N>::swap(array<T, N>& other) {
-  // std::swap_ranges(elements_, elements_ + N, other.elements_);
-  for (size_t i = 0; i < N; ++i) {
-    std::swap(elements_, other.elements_);
-  }
+template <typename T, size_t N>
+void array<T, N>::swap(array<T, N>& other) noexcept {
+  std::swap_ranges(other.elements_, other.elements_ + N, elements_);
 }
 
-template <typename T, std::size_t N>
+template <typename T, size_t N>
 void array<T, N>::fill(array<T, N>::const_reference value) {
-  // std::fill_n(elements_, n, value);
-  for (size_t i = 0; i < N; ++i) {
-    elements_[i] = value;
-  }
+  std::fill_n(elements_, N, value);
 }
 
 }  // namespace s21
