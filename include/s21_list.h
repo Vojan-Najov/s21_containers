@@ -8,17 +8,17 @@
 
 namespace s21 {
 
-template<typename T>
+template <typename T>
 struct ListNode {
-	ListNode *prev;
-	ListNode *next;
-	T value;
+  ListNode *prev;
+  ListNode *next;
+  T value;
 };
 
 template <typename T>
 class list;
 
-template<typename T>
+template <typename T>
 class ListIterator {
  public:
   ListIterator(ListNode<T> *node) : node_(node) {}
@@ -32,20 +32,20 @@ class ListIterator {
     node_ = other.node_;
     return *this;
   }
-  ListIterator& operator++(void) {
+  ListIterator &operator++(void) {
     node_ = node_->next;
     return *this;
   }
-  ListIterator& operator++(int) {
+  ListIterator &operator++(int) {
     ListIterator tmp(*this);
     node_ = node_->next;
     return tmp;
   }
-  ListIterator& operator--(void) {
+  ListIterator &operator--(void) {
     node_ = node_->prev;
     return *this;
   }
-  ListIterator& operator--(int) {
+  ListIterator &operator--(int) {
     ListIterator tmp(*this);
     node_ = node_->prev;
     return tmp;
@@ -56,7 +56,8 @@ class ListIterator {
   const T *operator->(void) const { return &node_->value; }
 
   template <typename U>
-  friend bool operator==(const ListIterator<U> &lhs, const ListIterator<U> &rhs);
+  friend bool operator==(const ListIterator<U> &lhs,
+                         const ListIterator<U> &rhs);
 
   friend list<T>;
 
@@ -66,31 +67,31 @@ class ListIterator {
 
 template <typename T>
 bool operator==(const ListIterator<T> &lhs, const ListIterator<T> &rhs) {
-	return lhs.node_ == rhs.node_;
+  return lhs.node_ == rhs.node_;
 }
 
 template <typename T>
 bool operator!=(const ListIterator<T> &lhs, const ListIterator<T> &rhs) {
-	return !(lhs == rhs);
+  return !(lhs == rhs);
 }
 
-template<typename T>
+template <typename T>
 class list {
  public:
   typedef T value_type;
-  typedef value_type& reference;
-  typedef const value_type& const_reference;
+  typedef value_type &reference;
+  typedef const value_type &const_reference;
   typedef ListIterator<value_type> iterator;
   typedef const ListIterator<value_type> const_iterator;
   typedef size_t size_type;
 
   list(void);
   list(size_type n);
-  list(const std::initializer_list<value_type>& items);
-  list(const list& other);
-  list(list&& other);
-  list& operator=(const list& other);
-  list& operator=(list&& other);
+  list(const std::initializer_list<value_type> &items);
+  list(const list &other);
+  list(list &&other);
+  list &operator=(const list &other);
+  list &operator=(list &&other);
   ~list(void);
 
   reference front(void);
@@ -105,7 +106,7 @@ class list {
 
   bool empty(void) const noexcept;
   size_type size(void) const noexcept;
-  //size_type max_size(void) const;
+  // size_type max_size(void) const;
 
   void clear(void);
   iterator insert(iterator pos, const_reference value);
@@ -114,9 +115,9 @@ class list {
   void pop_back(void);
   void push_front(const_reference value);
   void pop_front(void);
-  void swap(list& other);
-  void merge(list& other);
-  void splice(const_iterator pos, list&  other);
+  void swap(list &other);
+  void merge(list &other);
+  void splice(const_iterator pos, list &other);
   void reverse(void);
   void unique(void);
   void sort(void);
@@ -125,17 +126,18 @@ class list {
   ListNode<T> *head_;
 
  private:
-  ListNode<T> *CreateNode(ListNode<T> *prev, ListNode<T> *next, const T& value);
+  ListNode<T> *CreateNode(ListNode<T> *prev, ListNode<T> *next, const T &value);
   void DestroyNode(ListNode<T> *node);
   void transfer(iterator position, iterator first, iterator last);
 };
 
 // Auxiliary private member function for work with nodes.
 
-template<typename T>
+template <typename T>
 ListNode<T> *list<T>::CreateNode(ListNode<T> *prev, ListNode<T> *next,
-                                 const T& value) {
-  ListNode<T> *nptr = static_cast<ListNode<T> *>(operator new (sizeof(ListNode<T>)));
+                                 const T &value) {
+  ListNode<T> *nptr =
+      static_cast<ListNode<T> *>(operator new(sizeof(ListNode<T>)));
   nptr->prev = prev;
   nptr->next = next;
   try {
@@ -148,10 +150,10 @@ ListNode<T> *list<T>::CreateNode(ListNode<T> *prev, ListNode<T> *next,
   return nptr;
 }
 
-template<typename T>
+template <typename T>
 void list<T>::DestroyNode(ListNode<T> *node) {
   node->value.~T();
-  operator delete (static_cast<void *>(node));
+  operator delete(static_cast<void *>(node));
 }
 
 template <typename T>
@@ -172,9 +174,9 @@ void list<T>::transfer(iterator position, iterator first, iterator last) {
 
 template <typename T>
 list<T>::list(void) {
-	head_ = static_cast<ListNode<T> *>(operator new (sizeof(ListNode<T>)));
-	head_->next = head_;
-	head_->prev = head_;
+  head_ = static_cast<ListNode<T> *>(operator new(sizeof(ListNode<T>)));
+  head_->next = head_;
+  head_->prev = head_;
 }
 
 template <typename T>
@@ -188,7 +190,7 @@ list<T>::list(size_t n) : list() {
 }
 
 template <typename T>
-list<T>::list(const std::initializer_list<T>& items) : list() {
+list<T>::list(const std::initializer_list<T> &items) : list() {
   for (const T &item : items) {
     push_back(item);
   }
@@ -199,7 +201,7 @@ list<T>::list(const list<T> &other) : list() {
   ListNode<T> *nptr = other.head_->next;
   while (nptr != other.head_) {
     push_back(nptr->value);
-	nptr = nptr->next;
+    nptr = nptr->next;
   }
 }
 
@@ -229,29 +231,29 @@ list<T> &list<T>::operator=(list<T> &&other) {
 
 template <typename T>
 list<T>::~list(void) {
-	clear();
-	operator delete (head_);
+  clear();
+  operator delete(head_);
 }
 
 // List element access
 
 template <typename T>
-T& list<T>::front(void) {
+T &list<T>::front(void) {
   return head_->next->value;
 }
 
 template <typename T>
-const T& list<T>::front(void) const {
+const T &list<T>::front(void) const {
   return head_->next->value;
 }
 
 template <typename T>
-T& list<T>::back(void) {
+T &list<T>::back(void) {
   return head_->prev->value;
 }
 
 template <typename T>
-const T& list<T>::back(void) const {
+const T &list<T>::back(void) const {
   return head_->prev->value;
 }
 
@@ -277,23 +279,22 @@ const ListIterator<T> list<T>::end(void) const {
   return ListIterator(head_);
 }
 
-
 // List capacity
 
-template<typename T>
+template <typename T>
 inline bool list<T>::empty(void) const noexcept {
-	return head_->next == head_;
+  return head_->next == head_;
 }
 
-template<typename T>
+template <typename T>
 inline size_t list<T>::size(void) const noexcept {
-	size_t n = 0;
-	ListNode<T> *tmp = head_->next;
-	while (tmp != head_) {
-		++n;
-		tmp = tmp->next;
-	}
-	return n;
+  size_t n = 0;
+  ListNode<T> *tmp = head_->next;
+  while (tmp != head_) {
+    ++n;
+    tmp = tmp->next;
+  }
+  return n;
 }
 
 // List modifiers
@@ -310,7 +311,7 @@ void list<T>::clear(void) {
 
 template <typename T>
 ListIterator<T> list<T>::insert(ListIterator<T> pos, const T &value) {
-  ListNode<T> * node = CreateNode(pos.node_, pos.node_->next, value);
+  ListNode<T> *node = CreateNode(pos.node_, pos.node_->next, value);
   pos.node_->next->prev = node;
   pos.node_->next = node;
   return pos;
@@ -335,7 +336,7 @@ void list<T>::push_back(list<T>::const_reference value) {
   head_->prev = nptr;
 }
 
-template<typename T>
+template <typename T>
 void list<T>::pop_back(void) {
   if (empty()) {
     return;
@@ -347,7 +348,7 @@ void list<T>::pop_back(void) {
   DestroyNode(tmp);
 }
 
-template<typename T>
+template <typename T>
 void list<T>::push_front(list<T>::const_reference value) {
   ListNode<T> *nptr = CreateNode(head_, head_->next, value);
   if (empty()) {
@@ -355,7 +356,7 @@ void list<T>::push_front(list<T>::const_reference value) {
   } else {
     head_->next->prev = nptr;
   }
-    head_->next = nptr;
+  head_->next = nptr;
 }
 
 template <typename T>
@@ -371,14 +372,14 @@ void list<T>::pop_front(void) {
 }
 
 template <typename T>
-void list<T>::swap(list& other) {
+void list<T>::swap(list &other) {
   std::swap(head_, other.head_);
 }
 
 template <typename T>
-void list<T>::merge(list& other) {
+void list<T>::merge(list &other) {
   if (this == &other) {
-    return ;
+    return;
   }
 
   iterator first1 = begin();
@@ -386,10 +387,10 @@ void list<T>::merge(list& other) {
   iterator first2 = other.begin();
   iterator last2 = other.end();
   while (first1 != last1 && first2 != last2) {
-   if (*first2 < *first1) {
-     iterator next = first2;
-     ++next;
-     {
+    if (*first2 < *first1) {
+      iterator next = first2;
+      ++next;
+      {
         ListNode<T> *tmp = first2.node_;
         tmp->prev->next = tmp->next;
         tmp->next->prev = tmp->prev;
@@ -398,11 +399,11 @@ void list<T>::merge(list& other) {
         tmp->prev = node->prev;
         node->prev->next = tmp;
         node->prev = tmp;
-     }
-     first2 = next;
-   } else {
-     ++first1;
-   }
+      }
+      first2 = next;
+    } else {
+      ++first1;
+    }
   }
   while (first2 != last2) {
     iterator next = first2;
@@ -419,7 +420,7 @@ void list<T>::merge(list& other) {
 }
 
 template <typename T>
-void list<T>::splice(const ListIterator<T> pos, list<T>& other) {
+void list<T>::splice(const ListIterator<T> pos, list<T> &other) {
   iterator first = other.begin();
   iterator last = other.end();
   while (first != last) {
@@ -456,7 +457,7 @@ void list<T>::unique(void) {
   }
 }
 
-template<typename T>
+template <typename T>
 void list<T>::sort(void) {
   if (head_ == head_->next || head_->next->next == head_) {
     return;
@@ -480,11 +481,11 @@ void list<T>::sort(void) {
   }
 
   for (int i = 1; i < fill; ++i) {
-    hooks[i].merge(hooks[i-1]);
+    hooks[i].merge(hooks[i - 1]);
   }
   swap(hooks[fill - 1]);
 }
 
-} // namespace s21
+}  // namespace s21
 
 #endif  // INCLUDE_S21_LIST_H_
