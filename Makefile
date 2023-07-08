@@ -31,7 +31,7 @@ $(TEST_OBJ_DIR)/%.o: $(TEST_SRC_DIR)/%.cc $(INCLUDE)
 
 format:
 	cp materials/linters/.clang-format .
-	clang-format -i include/*.h
+	clang-format -i $(INCLUDE) $(TEST_SRC)
 	rm .clang-format
 
 clean:
