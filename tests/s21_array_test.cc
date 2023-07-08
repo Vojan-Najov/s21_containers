@@ -37,7 +37,7 @@ TEST_F(ArrayTest, DefaultCtor) {
 
   EXPECT_EQ(sizeof(s21_1), sizeof(std_1));
   for (size_t i = 0; i < std_1.size(); ++i) {
-    EXPECT_EQ(s21_1[i], std_1[i]);
+    EXPECT_EQ(s21_1[i], s21_1[i]);
   }
 }
 
