@@ -1,21 +1,21 @@
 #include "s21_array.h"
 
-#include <array>
-
 #include <gtest/gtest.h>
+
+#include <array>
 
 class ArrayTest : public ::testing::Test {
  protected:
   void SetUp(void) override {
-     for (size_t i = 0; i < 10; ++i) {
-       s21_4[i] = 0.99 + i * 17.75;
-       std_4[i] = 0.99 + i * 17.75;
-       s21_5[i] = 0.99 - i * 17.75;
-       std_5[i] = 0.99 - i * 17.75;
-     }    
+    for (size_t i = 0; i < 10; ++i) {
+      s21_4[i] = 0.99 + i * 17.75;
+      std_4[i] = 0.99 + i * 17.75;
+      s21_5[i] = 0.99 - i * 17.75;
+      std_5[i] = 0.99 - i * 17.75;
+    }
   }
 
-  s21::array<int, 1> s21_0; 
+  s21::array<int, 1> s21_0;
   s21::array<int, 100> s21_1;
   s21::array<double, 5> s21_2 = {1.1, 2.2, 3.3, 4.4, 5.5};
   s21::array<float, 10> s21_3 = {1.1f, 2.2f, 3.3f, 4.4f, 5.5f};
@@ -23,7 +23,7 @@ class ArrayTest : public ::testing::Test {
   s21::array<float, 10> s21_5;
   const s21::array<float, 5> s21_const_array = {1.1, 2.2, 3.3, 4.4, 5.5};
 
-  s21::array<int, 1> std_0; 
+  s21::array<int, 1> std_0;
   std::array<int, 100> std_1;
   std::array<double, 5> std_2 = {1.1, 2.2, 3.3, 4.4, 5.5};
   std::array<float, 10> std_3 = {1.1f, 2.2f, 3.3f, 4.4f, 5.5f};

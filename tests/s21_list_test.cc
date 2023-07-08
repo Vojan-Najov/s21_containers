@@ -1,9 +1,10 @@
-#include "gtest/gtest.h"
 #include "s21_list.h"
 
 #include <cstdlib>
-#include <vector>
 #include <list>
+#include <vector>
+
+#include "gtest/gtest.h"
 
 class ListTest : public ::testing::Test {
  protected:
@@ -16,13 +17,15 @@ class ListTest : public ::testing::Test {
       s.push_back(value);
     }
 
-    ll.push_back(v1); ll.push_back(v2);
-    ss.push_back(v1); ss.push_back(v2);
+    ll.push_back(v1);
+    ll.push_back(v2);
+    ss.push_back(v1);
+    ss.push_back(v2);
   }
   template <typename T>
   void EqualList(s21::list<T> &lhs, std::list<T> &rhs) {
     EXPECT_EQ(lhs.size(), rhs.size());
-    
+
     auto lhs_it = lhs.begin();
     auto lhs_last = lhs.end();
     auto rhs_it = rhs.begin();
@@ -33,14 +36,14 @@ class ListTest : public ::testing::Test {
     }
   }
 
-  s21::list<int> l; // size is 10000
-  std::list<int> s; // size is 10000
+  s21::list<int> l;  // size is 10000
+  std::list<int> s;  // size is 10000
 
-  std::vector<int> v1 = {0, 1, 2, 3, 4 , 5, 6, 7, 8, 9};
+  std::vector<int> v1 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
   std::vector<int> v2{100, 1};
 
-  s21::list<std::vector<int>> ll; // size is 2;
-  std::list<std::vector<int>> ss; // size is 2
+  s21::list<std::vector<int>> ll;  // size is 2;
+  std::list<std::vector<int>> ss;  // size is 2
 };
 
 TEST_F(ListTest, DefaultCtor) {
@@ -76,7 +79,7 @@ TEST_F(ListTest, InitCtor) {
   EXPECT_TRUE(l1.empty());
   EXPECT_EQ(l1.size(), 0);
 
-  s21::list<int> l2 = {0, 1, 2, 3, 4, 5, 6, 7 ,8 , 9};
+  s21::list<int> l2 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
   EXPECT_FALSE(l2.empty());
   EXPECT_EQ(l2.size(), 10);
 
@@ -86,7 +89,7 @@ TEST_F(ListTest, InitCtor) {
   EXPECT_FALSE(l3.empty());
   EXPECT_EQ(l3.size(), 2);
 
-  const s21::list<int> l4 = {0, 1, 2, 3, 4, 5, 6, 7 ,8 , 9};
+  const s21::list<int> l4 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
   EXPECT_FALSE(l4.empty());
   EXPECT_EQ(l4.size(), 10);
 }
@@ -99,7 +102,7 @@ TEST_F(ListTest, CopyCtor) {
     EXPECT_EQ(l.size(), 0);
   }
   {
-    s21::list<int> copy = {0, 1, 2, 3, 4, 5, 6, 7 ,8 , 9};
+    s21::list<int> copy = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     s21::list<int> l(copy);
     EXPECT_FALSE(l.empty());
     EXPECT_EQ(l.size(), 10);
@@ -113,7 +116,7 @@ TEST_F(ListTest, CopyCtor) {
     EXPECT_EQ(l.size(), 2);
   }
   {
-    const s21::list<int> copy = {0, 1, 2, 3, 4, 5, 6, 7 ,8 , 9};
+    const s21::list<int> copy = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     const s21::list<int> l(copy);
     EXPECT_FALSE(l.empty());
     EXPECT_EQ(l.size(), 10);
@@ -128,7 +131,7 @@ TEST_F(ListTest, MoveCtor) {
     EXPECT_EQ(l.size(), 0);
   }
   {
-    s21::list<int> copy = {0, 1, 2, 3, 4, 5, 6, 7 ,8 , 9};
+    s21::list<int> copy = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     s21::list<int> l(std::move(copy));
     EXPECT_FALSE(l.empty());
     EXPECT_EQ(l.size(), 10);
@@ -142,7 +145,7 @@ TEST_F(ListTest, MoveCtor) {
     EXPECT_EQ(l.size(), 2);
   }
   {
-    s21::list<int> copy = {0, 1, 2, 3, 4, 5, 6, 7 ,8 , 9};
+    s21::list<int> copy = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     const s21::list<int> l(std::move(copy));
     EXPECT_FALSE(l.empty());
     EXPECT_EQ(l.size(), 10);
@@ -158,7 +161,7 @@ TEST_F(ListTest, CopyOperatorAssign) {
     EXPECT_EQ(l.size(), 0);
   }
   {
-    s21::list<int> copy = {0, 1, 2, 3, 4, 5, 6, 7 ,8 , 9};
+    s21::list<int> copy = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     s21::list<int> l = {1, 2};
     l = copy;
     EXPECT_FALSE(l.empty());
@@ -184,7 +187,7 @@ TEST_F(ListTest, MoveOperatorAssign) {
     EXPECT_EQ(l.size(), 0);
   }
   {
-    s21::list<int> copy = {0, 1, 2, 3, 4, 5, 6, 7 ,8 , 9};
+    s21::list<int> copy = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     s21::list<int> l = {1, 2};
     l = std::move(copy);
     EXPECT_FALSE(l.empty());
@@ -212,7 +215,7 @@ TEST_F(ListTest, ElementAccess) {
   const std::list<int> cs = s;
   const s21::list<std::vector<int>> cll = ll;
   const std::list<std::vector<int>> css = ss;
- 
+
   EXPECT_EQ(cl.front(), cs.front());
   EXPECT_EQ(cl.back(), cs.back());
 
@@ -228,7 +231,8 @@ TEST_F(ListTest, Iterators) {
     auto send = s.end();
     while (sit != send) {
       EXPECT_EQ(*lit, *sit);
-      ++lit; ++sit;
+      ++lit;
+      ++sit;
     }
     EXPECT_EQ(lit, lend);
 
@@ -258,7 +262,8 @@ TEST_F(ListTest, Iterators) {
     auto ssend = ss.end();
     while (ssit != ssend) {
       EXPECT_EQ(llit->size(), ssit->size());
-      ++llit; ++ssit;
+      ++llit;
+      ++ssit;
     }
     EXPECT_EQ(llit, llend);
   }
@@ -276,7 +281,8 @@ TEST_F(ListTest, ConstIterators) {
     auto send = cs.cend();
     while (sit != send) {
       EXPECT_EQ(*lit, *sit);
-      ++lit; ++sit;
+      ++lit;
+      ++sit;
     }
     EXPECT_EQ(lit, lend);
 
@@ -306,7 +312,8 @@ TEST_F(ListTest, ConstIterators) {
     auto ssend = css.cend();
     while (ssit != ssend) {
       EXPECT_EQ(llit->size(), ssit->size());
-      ++llit; ++ssit;
+      ++llit;
+      ++ssit;
     }
     EXPECT_EQ(llit, llend);
   }
@@ -374,7 +381,8 @@ TEST_F(ListTest, Insert) {
   value = rand();
   l1.insert(l1.begin(), value);
   l2.insert(l2.begin(), value);
-  l1.clear(); l2.clear();
+  l1.clear();
+  l2.clear();
   value = rand();
   l1.insert(l1.end(), value);
   l2.insert(l2.end(), value);
@@ -397,7 +405,8 @@ TEST_F(ListTest, Erase) {
   auto lit = l.begin();
   auto sit = s.begin();
   for (int i = 0; i < 5; ++i) {
-    ++lit; ++sit;
+    ++lit;
+    ++sit;
   }
   l.erase(lit);
   s.erase(sit);
@@ -531,7 +540,7 @@ TEST_F(ListTest, Merge) {
     l2.push_back(i);
     s2.push_back(i);
   }
- 
+
   l1.merge(l2);
   s1.merge(s2);
   EqualList(l1, s1);
@@ -554,7 +563,7 @@ TEST_F(ListTest, Splice) {
   s21::list<int> ll;
   std::list<int> ss;
 
-  for(int i = 0; i < 1000; ++i) {
+  for (int i = 0; i < 1000; ++i) {
     int value = rand();
     ll.push_back(value);
     ss.push_back(value);
@@ -564,7 +573,7 @@ TEST_F(ListTest, Splice) {
   EqualList(l, s);
   EqualList(ll, ss);
 
-  for(int i = 0; i < 1000; ++i) {
+  for (int i = 0; i < 1000; ++i) {
     int value = rand();
     ll.push_back(value);
     ss.push_back(value);
@@ -579,104 +588,100 @@ TEST_F(ListTest, Splice) {
   EqualList(ll, ss);
 }
 
-
-
-
 /*
 TEST(tmp, tmp8) {
-	s21::list<int> l1 = {1, 2, 3, 4, 5, 6};
-	const s21::list<int> l2 = {-1, -2, -3};
+        s21::list<int> l1 = {1, 2, 3, 4, 5, 6};
+        const s21::list<int> l2 = {-1, -2, -3};
 
-	EXPECT_EQ(l1.front(), 1);
-	EXPECT_EQ(l2.front(), -1);
-	EXPECT_EQ(l1.back(), 6);
-	EXPECT_EQ(l2.back(), -3);
+        EXPECT_EQ(l1.front(), 1);
+        EXPECT_EQ(l2.front(), -1);
+        EXPECT_EQ(l1.back(), 6);
+        EXPECT_EQ(l2.back(), -3);
 }
 
 TEST(tmp, tmp9) {
-	int a[] = {1, 2, 3, 4, 5, 6};
-	s21::list<int> l = {1, 2, 3, 4, 5, 6};
+        int a[] = {1, 2, 3, 4, 5, 6};
+        s21::list<int> l = {1, 2, 3, 4, 5, 6};
 
-	for (int i = 5; i >= 0; --i) {
-		EXPECT_EQ(l.back(), a[i]);
-		l.pop_back();
-		EXPECT_EQ(l.size(), i);
+        for (int i = 5; i >= 0; --i) {
+                EXPECT_EQ(l.back(), a[i]);
+                l.pop_back();
+                EXPECT_EQ(l.size(), i);
     }
 }
 
 TEST(tmp, tmp10) {
-	int a[] = {1, 2, 3, 4, 5, 6};
-	s21::list<int> l = {1, 2, 3, 4, 5, 6};
+        int a[] = {1, 2, 3, 4, 5, 6};
+        s21::list<int> l = {1, 2, 3, 4, 5, 6};
 
-	for (size_t i = 0; i < 6; ++i) {
-		EXPECT_EQ(l.front(), a[i]);
-		l.pop_front();
-		EXPECT_EQ(l.size(), (size_t) 5 - i);
+        for (size_t i = 0; i < 6; ++i) {
+                EXPECT_EQ(l.front(), a[i]);
+                l.pop_front();
+                EXPECT_EQ(l.size(), (size_t) 5 - i);
     }
 }
 
 TEST(tmp, tmp11) {
-	int a[] = {1, 2, 3, 4, 5, 6};
-	s21::list<int> l = {1, 2, 3, 4, 5, 6};
+        int a[] = {1, 2, 3, 4, 5, 6};
+        s21::list<int> l = {1, 2, 3, 4, 5, 6};
 
-	int i = 0;
-	s21::list<int>::iterator it = l.begin();
-	while (it != l.end()) {
-		EXPECT_EQ(*it,  a[i++]);
-		++it;
-	}
+        int i = 0;
+        s21::list<int>::iterator it = l.begin();
+        while (it != l.end()) {
+                EXPECT_EQ(*it,  a[i++]);
+                ++it;
+        }
 }
 
 TEST(tmp, tmp12) {
-	int a[] = {1, 2, 3, 4, 5, 6};
-	s21::list<int> l = {1, 2, 3, 4, 5, 6};
+        int a[] = {1, 2, 3, 4, 5, 6};
+        s21::list<int> l = {1, 2, 3, 4, 5, 6};
 
-	int i = 6;
-	l.reverse();
-	s21::list<int>::iterator it = l.begin();
-	while (it != l.end()) {
-		EXPECT_EQ(*it,  a[--i]);
-		++it;
-	}
+        int i = 6;
+        l.reverse();
+        s21::list<int>::iterator it = l.begin();
+        while (it != l.end()) {
+                EXPECT_EQ(*it,  a[--i]);
+                ++it;
+        }
 }
 
 TEST(tmp, tmp13) {
-	int a[] = {1, 2, 3, 4, 5, 6};
-	s21::list<int> l = {1, 1, 2, 3, 3, 3, 4, 4, 4, 4, 5, 6, 6};
+        int a[] = {1, 2, 3, 4, 5, 6};
+        s21::list<int> l = {1, 1, 2, 3, 3, 3, 4, 4, 4, 4, 5, 6, 6};
 
-	int i = 0;
-	l.unique();
-	s21::list<int>::iterator it = l.begin();
-	while (it != l.end()) {
-		EXPECT_EQ(*it,  a[i++]);
-		++it;
-	}
+        int i = 0;
+        l.unique();
+        s21::list<int>::iterator it = l.begin();
+        while (it != l.end()) {
+                EXPECT_EQ(*it,  a[i++]);
+                ++it;
+        }
 }
 
 TEST(tmp, tmp14) {
-	int a[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-	s21::list<int> l1 = {1, 3, 6};
-	s21::list<int> l2 = {2, 4, 5, 7, 8, 9};
+        int a[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        s21::list<int> l1 = {1, 3, 6};
+        s21::list<int> l2 = {2, 4, 5, 7, 8, 9};
 
-	int i = 0;
-	l1.merge(l2);
-	s21::list<int>::iterator it = l1.begin();
-	while (it != l1.end()) {
-		EXPECT_EQ(*it,  a[i++]);
-		++it;
-	}
+        int i = 0;
+        l1.merge(l2);
+        s21::list<int>::iterator it = l1.begin();
+        while (it != l1.end()) {
+                EXPECT_EQ(*it,  a[i++]);
+                ++it;
+        }
 }
 
 TEST(tmp, tmp16) {
-	s21::list<int> l = {6, 1, 4, 2, 3, 5, 8, 9, 7};
+        s21::list<int> l = {6, 1, 4, 2, 3, 5, 8, 9, 7};
 
-	int i = 0;
-	l.sort();
-	s21::list<int>::iterator it = l.begin();
-	while (it != l.end()) {
-		EXPECT_EQ(*it,  ++i);
-		++it;
-	}
+        int i = 0;
+        l.sort();
+        s21::list<int>::iterator it = l.begin();
+        while (it != l.end()) {
+                EXPECT_EQ(*it,  ++i);
+                ++it;
+        }
 }
 */
-
