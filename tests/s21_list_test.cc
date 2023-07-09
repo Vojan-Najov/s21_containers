@@ -627,28 +627,28 @@ TEST_F(ListTest, Unique) {
     s.unique();
     EqualList(l, s);
   }
-  { 
+  {
     s21::list<int> l = {1};
     std::list<int> s = {1};
     l.unique();
     s.unique();
     EqualList(l, s);
   }
-  { 
+  {
     s21::list<int> l = {1, 2};
     std::list<int> s = {1, 2};
     l.unique();
     s.unique();
     EqualList(l, s);
   }
-  { 
+  {
     s21::list<int> l = {1, 1, 1};
     std::list<int> s = {1, 1, 1};
     l.unique();
     s.unique();
     EqualList(l, s);
   }
-  { 
+  {
     s21::list<int> l = {1, 1, 2, 2};
     std::list<int> s = {1, 1, 2, 2};
     l.unique();
@@ -677,28 +677,28 @@ TEST_F(ListTest, Sort) {
     s.sort();
     EqualList(l, s);
   }
-  { 
+  {
     s21::list<int> l = {1};
     std::list<int> s = {1};
     l.sort();
     s.sort();
     EqualList(l, s);
   }
-  { 
+  {
     s21::list<int> l = {1, 2};
     std::list<int> s = {1, 2};
     l.sort();
     s.sort();
     EqualList(l, s);
   }
-  { 
+  {
     s21::list<int> l = {1, 1, 1};
     std::list<int> s = {1, 1, 1};
     l.sort();
     s.sort();
     EqualList(l, s);
   }
-  { 
+  {
     s21::list<int> l = {1, 1, 2, 2};
     std::list<int> s = {1, 1, 2, 2};
     l.sort();
@@ -706,4 +706,3 @@ TEST_F(ListTest, Sort) {
     EqualList(l, s);
   }
 }
-
