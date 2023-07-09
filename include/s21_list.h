@@ -16,7 +16,7 @@ class list;
 // ListNode
 
 template <typename T>
-struct ListNode {
+struct ListNode final {
   ListNode *prev;
   ListNode *next;
   T value;
@@ -56,7 +56,7 @@ inline bool operator!=(const ListIteratorBase<T> &lhs,
 }
 
 template <typename T>
-class ListIterator : public ListIteratorBase<T> {
+class ListIterator final : public ListIteratorBase<T> {
  public:
   friend list<T>;
 
@@ -90,7 +90,7 @@ class ListIterator : public ListIteratorBase<T> {
 };
 
 template <typename T>
-class ListConstIterator : public ListIteratorBase<T> {
+class ListConstIterator final : public ListIteratorBase<T> {
  public:
   friend list<T>;
 
@@ -126,7 +126,7 @@ class ListConstIterator : public ListIteratorBase<T> {
 // list.
 
 template <typename T>
-class list {
+class list final {
  public:
   using value_type = T;
   using reference = value_type &;

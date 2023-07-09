@@ -11,7 +11,7 @@
 namespace s21 {
 
 template <typename T, size_t N>
-class array {
+class array final {
  public:
   typedef T value_type;
   typedef value_type& reference;
