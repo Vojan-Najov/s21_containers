@@ -37,6 +37,8 @@ class ListIteratorBase {
                          const ListIteratorBase<U> &rhs);
 
  protected:
+  ~ListIteratorBase(void) {} 
+ protected:
   ListNode<T> *node_;
 };
 
