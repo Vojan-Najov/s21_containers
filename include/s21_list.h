@@ -170,6 +170,9 @@ class list {
   void swap(list &other);
   void merge(list &other);
   void splice(const_iterator pos, list &other);
+  void reverse(void);
+  void unique(void);
+  void sort(void);
 
  private:
   ListNode<T> *CreateNode(ListNode<T> *prev, ListNode<T> *next,
@@ -425,6 +428,58 @@ inline void list<T>::merge(list<T> &other) {
 template <typename T>
 inline void list<T>::splice(const_iterator pos, list &other) {
   Transfer(iterator{pos.node_}, other.begin(), other.end());
+}
+
+template <typename T>
+inline void list<T>::reverse(void) {
+  ListNode<T> *node = head_;
+  do {
+    std::swap(node->prev, node->next);
+    node = node->prev;
+  } while (node != head_);
+}
+
+template <typename T>
+inline void list<T>::unique(void) {
+  iterator it = begin();
+  iterator last = end();
+  iterator next = it;
+  while (++next != last) {
+    if (*it == *next) {
+      erase(next);
+    } else {
+      it = next;
+    }
+    next = it;
+  }
+}
+
+template <typename T>
+inline void list<T>::sort(void) {
+  if (head_ == head_->next || head_->next->next == head_) {
+    return;
+  }
+
+  list hooks[64];
+  list carry;
+  int fill_hooks = 0;
+  while (!empty()) {
+    carry.Transfer(carry.begin(), begin(), ++begin());
+    int i = 0;
+    while (i < fill_hooks && !hooks[i].empty()) {
+      hooks[i].merge(carry);
+      carry.swap(hooks[i]);
+      ++i;
+    }
+    carry.swap(hooks[i]);
+    if (i == fill_hooks) {
+      ++fill_hooks;
+    }
+  }
+  for (int i = 0; i < fill_hooks; ++i) {
+    hooks[i].merge(hooks[i - 1]);
+  }
+  swap(hooks[fill_hooks - 1]);
 }
 
 }  // namespace s21
