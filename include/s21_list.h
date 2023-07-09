@@ -27,7 +27,7 @@ struct ListNode {
 template <typename T>
 class ListIteratorBase {
  public:
-  ListIteratorBase(ListNode<T> *node) : node_(node) {}
+  explicit ListIteratorBase(ListNode<T> *node) : node_(node) {}
 
   void increment(void) { node_ = node_->next; }
   void decrement(void) { node_ = node_->prev; }
@@ -63,7 +63,7 @@ class ListIterator : public ListIteratorBase<T> {
   using pointer = T *;
   using reference = T &;
 
-  ListIterator(ListNode<T> *node) : ListIteratorBase<T>(node) {}
+  explicit ListIterator(ListNode<T> *node) : ListIteratorBase<T>(node) {}
   ListIterator &operator++(void) {
     ListIteratorBase<T>::increment();
     return *this;
@@ -97,7 +97,7 @@ class ListConstIterator : public ListIteratorBase<T> {
   using pointer = T *;
   using reference = T &;
 
-  ListConstIterator(ListNode<T> *node) : ListIteratorBase<T>(node) {}
+  explicit ListConstIterator(ListNode<T> *node) : ListIteratorBase<T>(node) {}
   ListConstIterator &operator++(void) {
     ListIteratorBase<T>::increment();
     return *this;
@@ -134,7 +134,7 @@ class list {
 
  public:
   list(void);
-  list(size_type n);
+  explicit list(size_type n);
   list(const std::initializer_list<value_type> &items);
   list(const list &other);
   list(list &&other);
