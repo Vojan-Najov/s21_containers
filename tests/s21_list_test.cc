@@ -588,100 +588,122 @@ TEST_F(ListTest, Splice) {
   EqualList(ll, ss);
 }
 
-/*
-TEST(tmp, tmp8) {
-        s21::list<int> l1 = {1, 2, 3, 4, 5, 6};
-        const s21::list<int> l2 = {-1, -2, -3};
+TEST_F(ListTest, Reverse) {
+  s21::list<int> l;
+  std::list<int> s;
+  for (size_t i = 0; i < 10000; ++i) {
+    int value = std::rand();
+    l.push_front(value);
+    s.push_front(value);
+  }
+  l.reverse();
+  s.reverse();
+  EqualList(l, s);
 
-        EXPECT_EQ(l1.front(), 1);
-        EXPECT_EQ(l2.front(), -1);
-        EXPECT_EQ(l1.back(), 6);
-        EXPECT_EQ(l2.back(), -3);
+  s21::list<int> ll;
+  std::list<int> ss;
+  ll.reverse();
+  ss.reverse();
+  EqualList(ll, ss);
 }
 
-TEST(tmp, tmp9) {
-        int a[] = {1, 2, 3, 4, 5, 6};
-        s21::list<int> l = {1, 2, 3, 4, 5, 6};
-
-        for (int i = 5; i >= 0; --i) {
-                EXPECT_EQ(l.back(), a[i]);
-                l.pop_back();
-                EXPECT_EQ(l.size(), i);
+TEST_F(ListTest, Unique) {
+  {
+    s21::list<int> l;
+    std::list<int> s;
+    for (size_t i = 0; i < 10000; ++i) {
+      int value = std::rand() % 10;
+      l.push_front(value);
+      s.push_front(value);
     }
+    l.unique();
+    s.unique();
+    EqualList(l, s);
+  }
+  {
+    s21::list<int> l;
+    std::list<int> s;
+    l.unique();
+    s.unique();
+    EqualList(l, s);
+  }
+  { 
+    s21::list<int> l = {1};
+    std::list<int> s = {1};
+    l.unique();
+    s.unique();
+    EqualList(l, s);
+  }
+  { 
+    s21::list<int> l = {1, 2};
+    std::list<int> s = {1, 2};
+    l.unique();
+    s.unique();
+    EqualList(l, s);
+  }
+  { 
+    s21::list<int> l = {1, 1, 1};
+    std::list<int> s = {1, 1, 1};
+    l.unique();
+    s.unique();
+    EqualList(l, s);
+  }
+  { 
+    s21::list<int> l = {1, 1, 2, 2};
+    std::list<int> s = {1, 1, 2, 2};
+    l.unique();
+    s.unique();
+    EqualList(l, s);
+  }
 }
 
-TEST(tmp, tmp10) {
-        int a[] = {1, 2, 3, 4, 5, 6};
-        s21::list<int> l = {1, 2, 3, 4, 5, 6};
-
-        for (size_t i = 0; i < 6; ++i) {
-                EXPECT_EQ(l.front(), a[i]);
-                l.pop_front();
-                EXPECT_EQ(l.size(), (size_t) 5 - i);
+TEST_F(ListTest, Sort) {
+  {
+    s21::list<int> l;
+    std::list<int> s;
+    for (size_t i = 0; i < 10000; ++i) {
+      int value = std::rand();
+      l.push_front(value);
+      s.push_front(value);
     }
+    l.sort();
+    s.sort();
+    EqualList(l, s);
+  }
+  {
+    s21::list<int> l;
+    std::list<int> s;
+    l.sort();
+    s.sort();
+    EqualList(l, s);
+  }
+  { 
+    s21::list<int> l = {1};
+    std::list<int> s = {1};
+    l.sort();
+    s.sort();
+    EqualList(l, s);
+  }
+  { 
+    s21::list<int> l = {1, 2};
+    std::list<int> s = {1, 2};
+    l.sort();
+    s.sort();
+    EqualList(l, s);
+  }
+  { 
+    s21::list<int> l = {1, 1, 1};
+    std::list<int> s = {1, 1, 1};
+    l.sort();
+    s.sort();
+    EqualList(l, s);
+  }
+  { 
+    s21::list<int> l = {1, 1, 2, 2};
+    std::list<int> s = {1, 1, 2, 2};
+    l.sort();
+    s.sort();
+    EqualList(l, s);
+  }
 }
 
-TEST(tmp, tmp11) {
-        int a[] = {1, 2, 3, 4, 5, 6};
-        s21::list<int> l = {1, 2, 3, 4, 5, 6};
-
-        int i = 0;
-        s21::list<int>::iterator it = l.begin();
-        while (it != l.end()) {
-                EXPECT_EQ(*it,  a[i++]);
-                ++it;
-        }
-}
-
-TEST(tmp, tmp12) {
-        int a[] = {1, 2, 3, 4, 5, 6};
-        s21::list<int> l = {1, 2, 3, 4, 5, 6};
-
-        int i = 6;
-        l.reverse();
-        s21::list<int>::iterator it = l.begin();
-        while (it != l.end()) {
-                EXPECT_EQ(*it,  a[--i]);
-                ++it;
-        }
-}
-
-TEST(tmp, tmp13) {
-        int a[] = {1, 2, 3, 4, 5, 6};
-        s21::list<int> l = {1, 1, 2, 3, 3, 3, 4, 4, 4, 4, 5, 6, 6};
-
-        int i = 0;
-        l.unique();
-        s21::list<int>::iterator it = l.begin();
-        while (it != l.end()) {
-                EXPECT_EQ(*it,  a[i++]);
-                ++it;
-        }
-}
-
-TEST(tmp, tmp14) {
-        int a[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-        s21::list<int> l1 = {1, 3, 6};
-        s21::list<int> l2 = {2, 4, 5, 7, 8, 9};
-
-        int i = 0;
-        l1.merge(l2);
-        s21::list<int>::iterator it = l1.begin();
-        while (it != l1.end()) {
-                EXPECT_EQ(*it,  a[i++]);
-                ++it;
-        }
-}
-
-TEST(tmp, tmp16) {
-        s21::list<int> l = {6, 1, 4, 2, 3, 5, 8, 9, 7};
-
-        int i = 0;
-        l.sort();
-        s21::list<int>::iterator it = l.begin();
-        while (it != l.end()) {
-                EXPECT_EQ(*it,  ++i);
-                ++it;
-        }
-}
-*/
