@@ -1,4 +1,4 @@
-// Copyright 2023 <Carmine Carman, Vojan Najov>
+// Copyright 2023 <Carmine Cartman, Vojan Najov>
 
 #ifndef INCLUDE_S21_LIST_H_
 #define INCLUDE_S21_LIST_H_
