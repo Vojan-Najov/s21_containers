@@ -43,7 +43,7 @@ class stack final {
   stack &operator=(const stack &other) {
     if (this != &other) {
       stack tmp(other);
-      tmp.swap(*this);
+      swap(tmp);
     }
     return *this;
   }
