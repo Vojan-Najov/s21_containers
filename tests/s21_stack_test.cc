@@ -12,7 +12,7 @@ class StackTest : public ::testing::Test {
   void SetUp(void) override { srand(1); }
 
   template <typename T>
-  void StacksEqual(s21::stack<T> &s, std::stack<T> &ss) {
+  void StacksEqual(s21::stack<T> s, std::stack<T> ss) {
     EXPECT_EQ(s.empty(), ss.empty());
     EXPECT_EQ(s.size(), ss.size());
     while (!ss.empty()) {
