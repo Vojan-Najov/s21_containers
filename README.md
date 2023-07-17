@@ -10,6 +10,8 @@ Implementation of the s21_containers.h. library. List of classes: list, map, que
 ## Solution
 
 - [list](./include/s21_list.h)
+- [stack](./include/s21_stack.h)
+- [queue](./include/s21_queue.h)
 - [array](./include/s21_array.h)
 
 ## Materials.
