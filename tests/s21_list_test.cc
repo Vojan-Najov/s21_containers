@@ -320,10 +320,10 @@ TEST_F(ListTest, ConstIterators) {
 }
 
 TEST_F(ListTest, Capacity) {
-  s21::list<int> cl = l;
-  std::list<int> cs = s;
-  s21::list<std::vector<int>> cll = ll;
-  std::list<std::vector<int>> css = ss;
+  const s21::list<int> cl = l;
+  const std::list<int> cs = s;
+  const s21::list<std::vector<int>> cll = ll;
+  const std::list<std::vector<int>> css = ss;
 
   EXPECT_EQ(l.empty(), s.empty());
   EXPECT_EQ(ll.empty(), ss.empty());
