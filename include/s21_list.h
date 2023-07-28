@@ -479,7 +479,7 @@ inline void list<T>::sort(void) {
       ++fill_hooks;
     }
   }
-  for (int i = 0; i < fill_hooks; ++i) {
+  for (int i = 1; i < fill_hooks; ++i) {
     hooks[i].merge(hooks[i - 1]);
   }
   swap(hooks[fill_hooks - 1]);
