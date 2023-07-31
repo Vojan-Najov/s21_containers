@@ -426,9 +426,9 @@ class AvlTree final {
 	~AvlTree(void);
 
  public:
-	bool empty(void) const;
-	size_type size(void) const;
-	size_type max_size(void) const;
+	bool empty(void) const { return node_count_ == 0; }
+	size_type size(void) const { return node_count_; }
+	size_type max_size(void) const { return node_allocator_.max_size(); }
 
  public:
 	iterator begin(void) { return iterator(leftmost()); }
