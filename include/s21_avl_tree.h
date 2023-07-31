@@ -108,7 +108,8 @@ class AvlTreeIteratorBase {
 		}
 	}
 
- private:
+ //private:
+ public:
 	NodePtr node_;
 };
 
@@ -161,6 +162,9 @@ class AvlTreeIterator final : public AvlTreeIteratorBase<ValueType> {
 	template <typename U>
 	friend bool operator==(const AvlTreeIterator<U>& lhs,
 												 const AvlTreeIterator<U>& rhs);
+
+	// delete it
+	NodePtr getNode(void) const { return Base::node_; }
 };
 
 
@@ -419,7 +423,7 @@ class AvlTree final {
 	AvlTree(AvlTree&& other);
 	AvlTree &operator=(const AvlTree& other);
 	AvlTree &operator=(AvlTree&& other);
-	~AvlTree(void) { clear(); }
+	~AvlTree(void);
 
  public:
 	bool empty(void) const;
@@ -427,10 +431,10 @@ class AvlTree final {
 	size_type max_size(void) const;
 
  public:
-	iterator begin(void);
-	const_iterator cbegin(void) const;
-	iterator end(void);
-	const_iterator cend(void) const;
+	iterator begin(void) { return iterator(leftmost()); }
+	const_iterator cbegin(void) const { return const_iterator(leftmost()); }
+	iterator end(void) { return iterator(head_); }
+	const_iterator cend(void) const { return const_iterator(head_); }
 
  public:
 	std::pair<iterator, bool> insert_unique(reference value);
@@ -445,7 +449,7 @@ class AvlTree final {
 	size_type erase(const key_type &key);
 	void erase(const_iterator first, const_iterator last);
 	void erase(const key_type* first, const key_type* last);
-	void clear(void);
+	void Clear(void);
 
  public:
 	iterator find(const key_type& key);
@@ -457,7 +461,8 @@ class AvlTree final {
 	std::pair<iterator, iterator> equal_range(const key_type& key);
 	std::pair<const_iterator, const_iterator> equl_range(const key_type& key) const;
 	
- private:
+ //private:
+ public:
 	link_type& root(void) const { return head_->parent; }
 	link_type& leftmost(void) const { return head_->left; }
 	link_type& rightmost(void) const { return head_->right; }
@@ -467,8 +472,11 @@ class AvlTree final {
 	reference value(link_type node) { return node->value; }
 	const key_type& key(link_type node) { return KeyOfValue()(node->value); }
 	int& balanceFactor(link_type node) { return node->balance_factor; }
+	link_type minimum(link_type node) const;
+	link_type maximum(link_type node) const;
 
- private:
+ //private:
+ public:
 	link_type GetNode(void);
 	void PutNode(link_type ptr);
 	void ConstructValue(pointer ptr, const_reference value);
@@ -480,13 +488,16 @@ class AvlTree final {
 	link_type Copy(link_type node, link_type node_parent);
 	void EraseSubTree(link_type node);
 
- private:
+ //private:
+ public:
 	node_allocator_type node_allocator_;
 	value_allocator_type value_allocator_;
 	comparator_type key_compare_;
 	size_type node_count_;
 	link_type head_;
 
+ public:
+	void TestTree(void);
 };
 
 /*
@@ -522,10 +533,37 @@ AvlTree<K, V, KoV, C, A>::AvlTree(const AvlTree& copy)
 	}
 }
 
+/*
+*  Move constructor.
+*/
+template <typename K, typename V, typename KoV, typename C, typename A>
+AvlTree<K, V, KoV, C, A>::AvlTree(AvlTree&& other)
+		: node_allocator_(AvlTree::node_allocator_type()),
+			value_allocator_(AvlTree::value_allocator_type()),
+			key_compare_(AvlTree::comparator_type()),
+			node_count_(other.node_count_),
+			head_(other.head_)
+{
+	other.EmptyInitialize(); 
+}
+
+/*
+*  Destroy.
+*/
+template <typename K, typename V, typename KoV, typename C, typename A>
+AvlTree<K, V, KoV, C, A>::~AvlTree(void) {
+	Clear();
+	PutNode(head_);
+}
+
+
 // Modifiers
 
+/*
+*  Erases all nodes from the tree.
+*/
 template <typename K, typename V, typename KoV, typename C, typename A>
-void AvlTree<K, V, KoV, C, A>::clear(void) {
+void AvlTree<K, V, KoV, C, A>::Clear(void) {
 	if (node_count_) {
 		EraseSubTree(root());
 		root() = nullptr;
@@ -534,9 +572,6 @@ void AvlTree<K, V, KoV, C, A>::clear(void) {
 		node_count_ = 0;
 	}
 }
-
-
-// Allocate, Destroy, Construct and Destruct tree nodes
 
 /*
 *  Allocate memory for a node.
@@ -582,12 +617,14 @@ inline typename AvlTree<K, V, KoV, C, A>::link_type
 AvlTree<K, V, KoV, C, A>::CreateNode(const value_type& value)
 {
 	link_type node = GetNode();
+
 	try {
 		ConstructValue(&node->value, value);
 	} catch (...) {
 		PutNode(node);
 		throw;
 	}
+
 	return node;
 }
 
@@ -616,6 +653,32 @@ inline void AvlTree<K, V, KoV, C, A>::DestroyNode(
 		const typename AvlTree<K, V, KoV, C, A>::link_type node) {
 	DestroyValue(&value(node));
 	PutNode(node);
+}
+
+/*
+*  Find the leftmost node in the subtree
+*  with the root passed as an argument "node".  
+*/
+template <typename K, typename V, typename KoV, typename C, typename A>
+inline typename AvlTree<K, V, KoV, C, A>::link_type
+AvlTree<K, V, KoV, C, A>::minimum(link_type node) const {
+	while (left(node) != nullptr) {
+		node = node->left;
+	}
+	return node;
+}
+
+/*
+*  Find the rightmost node in the subtree
+*  with the root passed as an argument "node".  
+*/
+template <typename K, typename V, typename KoV, typename C, typename A>
+inline typename AvlTree<K, V, KoV, C, A>::link_type
+AvlTree<K, V, KoV, C, A>::maximum(link_type node) const {
+	while (right(node) != nullptr) {
+		node = node->right;
+	}
+	return node;
 }
 
 /*
