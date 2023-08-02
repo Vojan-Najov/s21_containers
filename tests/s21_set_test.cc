@@ -335,3 +335,106 @@ TEST_F(SetTest, MoveOperatorAssign) {
 		EXPECT_TRUE(SetEqual(s21_set, std_set));
 	}
 }
+
+TEST_F(SetTest, Iterator) {
+	{
+		s21::set<std::string>::iterator s21_it = ss21.begin();
+		std::set<std::string>::iterator std_it = sstd.begin();
+
+		++s21_it; ++s21_it;
+		++std_it; ++std_it;
+		EXPECT_EQ(*s21_it, *std_it);
+		EXPECT_EQ(*++s21_it, *++std_it);
+		EXPECT_EQ(*s21_it++, *std_it++);
+		EXPECT_EQ(*s21_it, *std_it);
+		EXPECT_EQ(*s21_it--, *std_it--);
+		EXPECT_EQ(*s21_it, *std_it);
+		EXPECT_EQ(*--s21_it, *--std_it);
+		EXPECT_EQ(*s21_it, *std_it);
+		--s21_it;
+		--std_it;
+		EXPECT_EQ(s21_it++->size(), std_it++->size());
+
+		auto s21_tmp = s21_it++;
+		auto std_tmp = std_it++;
+		EXPECT_FALSE(s21_tmp == s21_it);
+		EXPECT_FALSE(std_tmp == std_it);
+		EXPECT_TRUE(s21_tmp != s21_it);
+		EXPECT_TRUE(std_tmp != std_it);
+		++s21_tmp; ++std_tmp;
+		EXPECT_TRUE(s21_tmp == s21_it);
+		EXPECT_TRUE(std_tmp == std_it);
+		EXPECT_FALSE(s21_tmp != s21_it);
+		EXPECT_FALSE(std_tmp != std_it);
+	}
+	{
+		s21::set<std::string>::iterator s21_it = ss21.end();
+		std::set<std::string>::iterator std_it = sstd.end();
+		--s21_it; --s21_it;
+		--std_it; --std_it;
+		EXPECT_EQ(*s21_it, *std_it);
+		EXPECT_EQ(*--s21_it, *--std_it);
+		EXPECT_EQ(*s21_it--, *std_it--);
+		EXPECT_EQ(*s21_it, *std_it);
+		EXPECT_EQ(*s21_it++, *std_it++);
+		EXPECT_EQ(*s21_it, *std_it);
+		EXPECT_EQ(*++s21_it, *++std_it);
+		EXPECT_EQ(*s21_it, *std_it);
+		--s21_it;
+		--std_it;
+		EXPECT_EQ(s21_it--->size(), std_it--->size());
+	}
+}
+
+TEST_F(SetTest, ConstIterator) {
+	const s21::set<std::string> css21 = ss21;
+	const std::set<std::string> csstd = sstd;
+
+	{
+		s21::set<std::string>::const_iterator s21_it = css21.begin();
+		std::set<std::string>::const_iterator std_it = csstd.begin();
+
+		++s21_it; ++s21_it;
+		++std_it; ++std_it;
+		EXPECT_EQ(*s21_it, *std_it);
+		EXPECT_EQ(*++s21_it, *++std_it);
+		EXPECT_EQ(*s21_it++, *std_it++);
+		EXPECT_EQ(*s21_it, *std_it);
+		EXPECT_EQ(*s21_it--, *std_it--);
+		EXPECT_EQ(*s21_it, *std_it);
+		EXPECT_EQ(*--s21_it, *--std_it);
+		EXPECT_EQ(*s21_it, *std_it);
+		--s21_it;
+		--std_it;
+		EXPECT_EQ(s21_it++->size(), std_it++->size());
+
+		auto s21_tmp = s21_it++;
+		auto std_tmp = std_it++;
+		EXPECT_FALSE(s21_tmp == s21_it);
+		EXPECT_FALSE(std_tmp == std_it);
+		EXPECT_TRUE(s21_tmp != s21_it);
+		EXPECT_TRUE(std_tmp != std_it);
+		++s21_tmp; ++std_tmp;
+		EXPECT_TRUE(s21_tmp == s21_it);
+		EXPECT_TRUE(std_tmp == std_it);
+		EXPECT_FALSE(s21_tmp != s21_it);
+		EXPECT_FALSE(std_tmp != std_it);
+	}
+	{
+		s21::set<std::string>::const_iterator s21_it = css21.end();
+		std::set<std::string>::const_iterator std_it = csstd.end();
+		--s21_it; --s21_it;
+		--std_it; --std_it;
+		EXPECT_EQ(*s21_it, *std_it);
+		EXPECT_EQ(*--s21_it, *--std_it);
+		EXPECT_EQ(*s21_it--, *std_it--);
+		EXPECT_EQ(*s21_it, *std_it);
+		EXPECT_EQ(*s21_it++, *std_it++);
+		EXPECT_EQ(*s21_it, *std_it);
+		EXPECT_EQ(*++s21_it, *++std_it);
+		EXPECT_EQ(*s21_it, *std_it);
+		--s21_it;
+		--std_it;
+		EXPECT_EQ(s21_it->size(), std_it->size());
+	}
+}
