@@ -140,7 +140,7 @@ class AvlTreeIterator final : public AvlTreeIteratorBase<ValueType> {
 	}
 
 	pointer operator->(void) const {
-		return &Base::node->value;
+		return &Base::node_->value;
 	}
 
 	Self& operator++(void) {
@@ -209,7 +209,7 @@ class AvlTreeConstIterator final : public AvlTreeIteratorBase<ValueType> {
 	}
 
 	const_pointer operator->(void) const {
-		return &Base::node->value;
+		return &Base::node_->value;
 	}
 
 	Self& operator++(void) {
@@ -447,7 +447,7 @@ class AvlTree final {
 	const_iterator cend(void) const noexcept { return const_iterator(head_); }
 
  public:
-	void Swap(AvlTree& other) noexcept;
+	void swap(AvlTree& other) noexcept;
 
  public:
 	std::pair<iterator, bool> InsertUnique(const_reference value);
@@ -554,7 +554,7 @@ template <typename K, typename V, typename KoV, typename C, typename A>
 AvlTree<K, V, KoV, C, A>::AvlTree(AvlTree&& other)
 		: AvlTree()
 {
-	Swap(other);
+	swap(other);
 }
 
 /*
@@ -564,7 +564,7 @@ template <typename K, typename V, typename KoV, typename C, typename A>
 AvlTree<K, V, KoV, C, A>& AvlTree<K, V, KoV, C, A>::operator=(const AvlTree& other) {
 	if (this != &other) {
 		AvlTree tmp(other);
-		Swap(tmp);
+		swap(tmp);
 	}
 	return *this;
 }
@@ -576,7 +576,7 @@ template <typename K, typename V, typename KoV, typename C, typename A>
 AvlTree<K, V, KoV, C, A>&
 AvlTree<K, V, KoV, C, A>::operator=(AvlTree&& other) noexcept {
 	if (this != &other) {
-		Swap(other);
+		swap(other);
 	}
 	return *this;
 }
@@ -597,7 +597,7 @@ AvlTree<K, V, KoV, C, A>::~AvlTree(void) {
 *  Swap the contents of the trees.
 */
 template <typename K, typename V, typename KoV, typename C, typename A>
-inline void AvlTree<K, V, KoV, C, A>::Swap(AvlTree& other) noexcept {
+inline void AvlTree<K, V, KoV, C, A>::swap(AvlTree& other) noexcept {
 	std::swap(head_, other.head_);
 	std::swap(node_count_, other.node_count_);
 	std::swap(key_compare_, other.key_compare_);
