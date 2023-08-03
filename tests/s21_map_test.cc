@@ -428,3 +428,55 @@ TEST_F(MapTest, ConstIterator) {
 	}
 }
 
+TEST_F(MapTest, Capacity) {
+	{
+		s21::map<int, std::vector<double>> s21_m;
+		std::map<int, std::vector<double>> std_m;
+
+		EXPECT_EQ(s21_m.empty(), std_m.empty());
+		EXPECT_EQ(s21_m.size(), std_m.size());
+		EXPECT_EQ(s21_m.max_size(), std_m.max_size());
+	}
+	{
+		s21::map<int, std::vector<double>> s21_m {
+			std::make_pair(10, std::vector<double>{1.0, 2.0})
+		};
+		std::map<int, std::vector<double>> std_m {
+			std::make_pair(10, std::vector<double>{1.0, 2.0})
+		};
+
+		EXPECT_EQ(s21_m.empty(), std_m.empty());
+		EXPECT_EQ(s21_m.size(), std_m.size());
+		EXPECT_EQ(s21_m.max_size(), std_m.max_size());
+	}
+	{
+		s21::map<int, std::vector<double>> s21_m {
+			std::make_pair(10, std::vector<double>{1.0, 2.0}),
+			std::make_pair(19, std::vector<double>{10.0, 20.0}),
+			std::make_pair(-19, std::vector<double>{100.0, 200.0})
+		};
+		std::map<int, std::vector<double>> std_m {
+			std::make_pair(10, std::vector<double>{1.0, 2.0}),
+			std::make_pair(19, std::vector<double>{10.0, 20.0}),
+			std::make_pair(-19, std::vector<double>{100.0, 200.0})
+		};
+
+		EXPECT_EQ(s21_m.empty(), std_m.empty());
+		EXPECT_EQ(s21_m.size(), std_m.size());
+		EXPECT_EQ(s21_m.max_size(), std_m.max_size());
+	}
+	{
+		EXPECT_EQ(ms21.empty(), mstd.empty());
+		EXPECT_EQ(ms21.size(), mstd.size());
+		EXPECT_EQ(ms21.max_size(), mstd.max_size());
+	}
+	{
+		const s21::map<int, std::string> cms21 = ms21;
+		const std::map<int, std::string> cmstd = mstd;
+
+		EXPECT_EQ(cms21.empty(), cmstd.empty());
+		EXPECT_EQ(cms21.size(), cmstd.size());
+		EXPECT_EQ(cms21.max_size(), cmstd.max_size());
+	}
+}
+

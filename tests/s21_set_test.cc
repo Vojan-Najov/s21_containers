@@ -438,3 +438,55 @@ TEST_F(SetTest, ConstIterator) {
 		EXPECT_EQ(s21_it->size(), std_it->size());
 	}
 }
+
+TEST_F(SetTest, Capacity) {
+	{
+		s21::set<std::vector<double>> s21_s;
+		std::set<std::vector<double>> std_s;
+
+		EXPECT_EQ(s21_s.empty(), std_s.empty());
+		EXPECT_EQ(s21_s.size(), std_s.size());
+		EXPECT_EQ(s21_s.max_size(), std_s.max_size());
+	}
+	{
+		s21::set<std::vector<double>> s21_s {
+			std::vector<double>{1.0, 2.0}
+		};
+		std::set<std::vector<double>> std_s {
+			std::vector<double>{1.0, 2.0}
+		};
+
+		EXPECT_EQ(s21_s.empty(), std_s.empty());
+		EXPECT_EQ(s21_s.size(), std_s.size());
+		EXPECT_EQ(s21_s.max_size(), std_s.max_size());
+	}
+	{
+		s21::set<std::vector<double>> s21_s {
+			std::vector<double>{1.0, 2.0},
+			std::vector<double>{10.0, 20.0},
+			std::vector<double>{100.0, 200.0}
+		};
+		std::set<std::vector<double>> std_s {
+			std::vector<double>{1.0, 2.0},
+			std::vector<double>{10.0, 20.0},
+			std::vector<double>{100.0, 200.0}
+		};
+
+		EXPECT_EQ(s21_s.empty(), std_s.empty());
+		EXPECT_EQ(s21_s.size(), std_s.size());
+		EXPECT_EQ(s21_s.max_size(), std_s.max_size());
+	}
+	{
+		EXPECT_EQ(ss21.empty(), sstd.empty());
+		EXPECT_EQ(ss21.size(), sstd.size());
+		EXPECT_EQ(ss21.max_size(), sstd.max_size());
+	}
+	{
+		const s21::set<std::string> css21 = ss21;
+		const std::set<std::string> csstd = sstd;
+
+		EXPECT_EQ(css21.empty(), csstd.empty());
+		EXPECT_EQ(css21.size(), csstd.size());
+		EXPECT_EQ(css21.max_size(), csstd.max_size());
+	}
+}
