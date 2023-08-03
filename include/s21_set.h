@@ -42,7 +42,7 @@ class set final {
 		tree_ = other.tree_;
 		return *this;
 	}
-	set& operator=(set &&other) {
+	set& operator=(set &&other) noexcept {
 		tree_ = std::move(other.tree_);
 		return *this;
 	}
@@ -57,9 +57,9 @@ class set final {
 	const_iterator cend(void) const noexcept { return tree_.cend(); }
 
  public:
-	bool empty(void) const { return tree_.empty(); }
-	size_type size(void) const { return tree_.size(); }
-	size_type max_size(void) const { return tree_.max_size(); }
+	bool empty(void) const noexcept { return tree_.empty(); }
+	size_type size(void) const noexcept { return tree_.size(); }
+	size_type max_size(void) const noexcept { return tree_.max_size(); }
 
  public:
 	void clear(void) { tree_.Clear(); }
