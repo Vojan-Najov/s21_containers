@@ -7,6 +7,7 @@
 #include <memory>
 #include <utility>
 #include <initializer_list>
+#include <stdexcept>
 
 namespace s21 {
 
@@ -32,7 +33,7 @@ class map final {
 	map(void) : tree_() {}
 	map(const std::initializer_list<value_type>& items) : tree_() {
 		for (const value_type& item : items) {
-			tree_.InsertUnique(item);
+			tree_.insert_unique(item);
 		}
 	}
 	map(const map& other) : tree_(other.tree_) {}
@@ -48,6 +49,31 @@ class map final {
 	~map(void) {}
 
  public:
+	mapped_type& at(const key_type& key) {
+		iterator it = find(key);
+		if (it == end()) {
+			throw std::out_of_range("Invalid key.");
+		}
+		return *it;
+	}
+	const mapped_type& at(const key_type& key) const {
+		iterator it = find(key);
+		if (it == end()) {
+			throw std::out_of_range("Invalid key.");
+		}
+		return *it;
+	}
+	mapped_type& operator[](const key_type &key) {
+		iterator it = find(key);
+		if (it == end()) {
+			std::pair<iterator, bool> result = tree_.insert(key, mapped_type());
+			it = result.first;
+		}
+		return (*it).second;
+	}
+
+
+ public:
 	iterator begin(void) noexcept { return tree_.begin(); }
 	const_iterator begin(void) const noexcept { return tree_.begin(); }
 	const_iterator cbegin(void) const noexcept { return tree_.cbegin(); }
@@ -61,16 +87,35 @@ class map final {
 	size_type max_size(void) const noexcept { return tree_.max_size(); }
 
  public:
-	void clear(void) { tree_.Clear(); }
+	void clear(void) { tree_.clear(); }
 	std::pair<iterator, bool> insert(const_reference value) {
-		return tree_.InsertUnique(value);
+		return tree_.insert_unique(value);
 	}
+	std::pair<iterator, bool> insert(const key_type& key, const mapped_type& value) {
+		return tree_.insert_unique(std::make_pair(key, value));
+	}
+	std::pair<iterator, bool>
+	insert_or_assign(const key_type& key, const mapped_type& value) {
+		iterator it = find(key);
+		if (it != end()) {
+			(*it).second = std::forward(value);
+			return std::make_pair(it, false);
+		} else {
+			return insert(key, value);
+		}
+	}
+	void erase(iterator position) { tree_.erase(position); }
 
  public:
-	bool contains(const Key& key) const;
+	iterator find(const key_type& key) { return tree_.find(key); }
+	const_iterator find(const key_type& key) const { return tree_.find(key); }
+	bool contains(const Key& key) const { return tree_.contains(key); }
 
  private:
 	BinaryTree tree_;
+
+ public:
+	int verify(void) { return tree_.verify(); }
 };
 
 } // namespace s21
