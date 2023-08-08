@@ -33,7 +33,7 @@ class set final {
 	set(void) : tree_() {}
 	set(const std::initializer_list<value_type>& items) : tree_() {
 		for (const value_type& item : items) {
-			tree_.InsertUnique(item);
+			tree_.insert_unique(item);
 		}
 	}
 	set(const set& other) : tree_(other.tree_) {}
@@ -64,7 +64,7 @@ class set final {
  public:
 	void clear(void) { tree_.Clear(); }
 	std::pair<iterator, bool> insert(const_reference value) {
-		return tree_.InsertUnique(value);
+		return tree_.insert_unique(value);
 	}
 
  public:
