@@ -62,13 +62,23 @@ class set final {
 	size_type max_size(void) const noexcept { return tree_.max_size(); }
 
  public:
-	void clear(void) { tree_.Clear(); }
+	void clear(void) { tree_.clear(); }
 	std::pair<iterator, bool> insert(const_reference value) {
 		return tree_.insert_unique(value);
 	}
+	void erase(iterator position) { tree_.erase(position); }
+	void swap(set& other) noexcept { tree_.swap(other.tree_); }
+	void merge(set& source) { tree_.merge(source.tree_); }
 
  public:
-	bool contains(const Key& key) const;
+	iterator find(const_reference key) { return tree_.find(key); }
+	const_iterator find(const_reference key) const { return tree_.find(key); }
+	bool contains(const_reference key) const { return tree_.contains(key); }
+
+#ifdef DEBUG
+ public:
+	int verify(void) const { return tree_.verify(); }
+#endif  // DEBUG
 
  public:
 	BinaryTree tree_;
