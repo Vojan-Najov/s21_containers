@@ -930,6 +930,123 @@ TEST_F(MapTest, Swap) {
 	EXPECT_TRUE(MapEqual(ms21, mstd));
 }
 
+TEST_F(MapTest, Merge1) {
+	{
+		s21::map<int, std::string> m_s21;
+		s21::map<int, std::string> source_s21;
+		std::map<int, std::string> m_std;
+		std::map<int, std::string> source_std;
+
+		m_s21.merge(source_s21);
+		m_std.merge(source_std);
+
+		EXPECT_TRUE(MapEqual(m_s21, m_std));
+		EXPECT_TRUE(MapEqual(source_s21, source_std));
+	}
+	{
+		s21::map<int, std::string> m_s21 = { {1, "1"} };
+		s21::map<int, std::string> source_s21;
+		std::map<int, std::string> m_std = { {1, "1"} };
+		std::map<int, std::string> source_std;
+
+		m_s21.merge(source_s21);
+		m_std.merge(source_std);
+
+		EXPECT_TRUE(MapEqual(m_s21, m_std));
+		EXPECT_TRUE(MapEqual(source_s21, source_std));
+	}
+	{
+		s21::map<int, std::string> m_s21;
+		s21::map<int, std::string> source_s21 = { {1, "1"} };
+		std::map<int, std::string> m_std;
+		std::map<int, std::string> source_std = { {1, "1"} };
+
+		m_s21.merge(source_s21);
+		m_std.merge(source_std);
+
+		EXPECT_TRUE(MapEqual(m_s21, m_std));
+		EXPECT_TRUE(MapEqual(source_s21, source_std));
+	}
+	{
+		s21::map<int, std::string> m_s21 = { {2, "2"} };
+		s21::map<int, std::string> source_s21 = { {1, "1"} };
+		std::map<int, std::string> m_std = { {2, "2"} };
+		std::map<int, std::string> source_std = { {1, "1"} };
+
+		m_s21.merge(source_s21);
+		m_std.merge(source_std);
+
+		EXPECT_TRUE(MapEqual(m_s21, m_std));
+		EXPECT_TRUE(MapEqual(source_s21, source_std));
+	}
+	{
+		s21::map<int, std::string> m_s21 = { {1, "1"}, {2, "2"} };
+		s21::map<int, std::string> source_s21 = { {1, "1"} };
+		std::map<int, std::string> m_std = { {1, "1"}, {2, "2"} };
+		std::map<int, std::string> source_std = { {1, "1"} };
+
+		m_s21.merge(source_s21);
+		m_std.merge(source_std);
+
+		EXPECT_TRUE(MapEqual(m_s21, m_std));
+		EXPECT_TRUE(MapEqual(source_s21, source_std));
+	}
+	{
+		s21::map<int, std::string> m_s21 = { {1, "1"}, {2, "2"} };
+		s21::map<int, std::string> source_s21 = { {1, "1"}, {3, "3"} };
+		std::map<int, std::string> m_std = { {1, "1"}, {2, "2"} };
+		std::map<int, std::string> source_std = { {1, "1"}, {3, "3"} };
+
+		m_s21.merge(source_s21);
+		m_std.merge(source_std);
+
+		EXPECT_TRUE(MapEqual(m_s21, m_std));
+		EXPECT_TRUE(MapEqual(source_s21, source_std));
+	}
+	{
+		s21::map<int, std::string> m_s21 =
+			{ {1, "1"}, {2, "2"}, {0, "0"}, {-1, "-1"}, {2, "2"} };
+		s21::map<int, std::string> source_s21 =
+			{ {1, "1"}, {3, "3"}, {2, "2"}, {4, "4"} , {5, "5"} };
+		std::map<int, std::string> m_std =
+			{ {1, "1"}, {2, "2"}, {0, "0"}, {-1, "-1"}, {2, "2"} };
+		std::map<int, std::string> source_std =
+			{ {1, "1"}, {3, "3"}, {2, "2"}, {4, "4"} , {5, "5"} };
+
+		m_s21.merge(source_s21);
+		m_std.merge(source_std);
+
+		EXPECT_TRUE(MapEqual(m_s21, m_std));
+		EXPECT_TRUE(MapEqual(source_s21, source_std));
+	}
+}
+
+TEST_F(MapTest, Merge2) {
+	s21::map<int, std::string> m_s21;
+	s21::map<int, std::string> source_s21;
+	std::map<int, std::string> m_std;
+	std::map<int, std::string> source_std;
+
+	for (int i = 0; i < 100000; ++i) {
+		int key = rand() % 1000000;
+		m_s21.insert(std::make_pair(key, std::to_string(key)));
+		m_std.insert(std::make_pair(key, std::to_string(key)));
+	}
+	for (int i = 0; i < 100000; ++i) {
+		int key = rand() % 100000;
+		source_s21.insert(std::make_pair(key, std::to_string(key + i)));
+		source_std.insert(std::make_pair(key, std::to_string(key + i)));
+	}
+
+	EXPECT_FALSE(MapEqual(m_s21, source_s21));
+
+	m_s21.merge(source_s21);
+	m_std.merge(source_std);
+
+	EXPECT_TRUE(MapEqual(m_s21, m_std));
+	EXPECT_TRUE(MapEqual(source_s21, source_std));
+}
+
 TEST_F(MapTest, Find) {
 	s21::map<int, std::string> m;
 	std::map<int, std::string> s;
