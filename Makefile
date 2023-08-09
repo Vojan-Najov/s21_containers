@@ -5,7 +5,7 @@ RMDIR = rm -rf
 RM = rm -f
 MKDIR = mkdir -p
 
-CXX_FLAGS = -Wall -Wextra -Werror -std=c++17
+CXX_FLAGS = -Wall -Wextra -Werror -std=c++17 -DDEBUG
 TEST_LIBS = -lgtest
 
 INCLUDE_DIR = ./include
