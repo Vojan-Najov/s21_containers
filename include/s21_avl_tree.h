@@ -305,9 +305,15 @@ class AvlTree final {
 	void erase_subtree(link_type node);
 	link_type find_node(const key_type& key) const;
 	iterator insert_aux(link_type x, link_type y, const_reference value);
-	void insert_rebalance(link_type z);
 	void erase_aux(link_type z);
-	void erase_rebalance(link_type n, int side);
+
+ private:
+	link_type rotate_left(link_type x);
+	link_type rotate_right(link_type x);
+	link_type rotate_left_right(link_type x);
+	link_type rotate_right_left(link_type x);
+	void insert_rebalance(link_type z);
+	void erase_rebalance(link_type n, int left_side);
 
  private:
 	node_allocator_type node_allocator_;
@@ -749,74 +755,62 @@ AvlTree<K, V, KoV, C, A>::insert_aux(link_type x,
 */
 template <typename K, typename V, typename KoV, typename C, typename A>
 void AvlTree<K, V, KoV, C, A>::erase_aux(link_type z) {
-	link_type y = z;
+	link_type y = nullptr;
 	link_type x = nullptr;
 	link_type node_for_balance = nullptr;
+	enum {none_side = -1, right_side = 0, left_side = 1} side = none_side;
 
-	enum {right = 0, left = 1} side;
-
-	if (y->right == nullptr) {
+	if (right(z) == nullptr || left(z) == nullptr) {
 		node_for_balance = z->parent;
-		x = y->left;
-		if (x != nullptr) {
-			x->parent = y->parent;
-		}
-		if (root() == z) {
-			root() = x;
-		} else if (z == z->parent->left) {
-			side = left;
-			z->parent->left = x;
+		if (right(z) == nullptr) {
+			x = left(z);
 		} else {
-			side = right;
-			z->parent->right = x;
+			x = right(z);
 		}
-	} else if (y->left == nullptr) {
-		node_for_balance = z->parent;
-		x = y->right;
 		if (x != nullptr) {
-			x->parent = y->parent;
+			parent(x) = parent(z);
 		}
-		if (root() == z) {
+		if (z == root()) {
 			root() = x;
-		} else if (z == z->parent->left) {
-			side = left;
-			z->parent->left = x;
-		} else {
-			side = right;
-			z->parent->right = x;
+		} else if (z == left(parent(z))) {
+			side = left_side;
+			left(parent(z)) = x;
+		} else {  // z == right(parent(z));
+			side = right_side;
+			right(parent(z)) = x;
 		}
 	} else {
-		y = y->right;
-		while (y->left != nullptr) {
-			y = y->left;
+		y = right(z);
+		while (left(y) != nullptr) {
+			y = left(y);
 		}
-		x = y->right;
-		if (z->left != nullptr) {
-			z->left->parent = y;
+		x = right(y);
+		if (left(z) != nullptr) {
+			parent(left(z)) = y;
 		}
-		y->left = z->left;
-		if (y == z->right) {
+		left(y) = left(z);
+		if (y == right(z)) {
 			node_for_balance = y;
-			side = right;
+			side = right_side;
 		} else {
-			node_for_balance = y->parent;
-			side = left;
+			node_for_balance = parent(y);
+			side = left_side;
 			if (x != nullptr) {
-				x->parent = y->parent;
+				parent(x) = parent(y);
 			}
-			y->parent->left = x;
-			y->right = z->right;
-			z->right->parent = y;
+			left(parent(y)) = x;
+			right(y) = right(z);
+			parent(right(z)) = y;
 		}
-		if (root() == z) {
+		if (z == root()) {
 			root() = y;
-		} else if (z->parent->left == z) {
-			z->parent->left = y;
+		} else if (z == left(parent(z))) {
+			left(parent(z)) = y;
 		} else {
-			z->parent->right = y;
+			right(parent(z)) = y;
 		}
-		y->parent = z->parent;
-		y->balance_factor = z->balance_factor;
+		parent(y) = parent(z);
+		balance_factor(y) = balance_factor(z);
 	}
 
 	if (node_for_balance != head_)
@@ -834,36 +828,25 @@ void AvlTree<K, V, KoV, C, A>::erase_aux(link_type z) {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
 // Operations on the binary search tree.
 
 /*
 * AVL TREE ROTATE LEFT
 */
-template <typename ValueType>
-inline AvlTreeNode<ValueType>*
-avlTreeRotateLeft(AvlTreeNode<ValueType> *x,
-									AvlTreeNode<ValueType>*& root) {
+template <typename K, typename V, typename KoV, typename C, typename A>
+inline typename AvlTree<K, V, KoV, C, A>::link_type
+AvlTree<K, V, KoV, C, A>::rotate_left(link_type x) {
 	assert(x != nullptr);
 	assert(x->right != nullptr);
-	AvlTreeNode<ValueType> *z = x->right;
+	link_type z = x->right;
+
 	x->right = z->left;
 	if (z->left != nullptr) {
 		z->left->parent = x;
 	}
 	z->parent = x->parent;
-	if (x == root) {
-		root = z;
+	if (x == root()) {
+		root() = z;
 	} else if (x == x->parent->left) {
 		x->parent->left = z;
 	} else {
@@ -886,20 +869,20 @@ avlTreeRotateLeft(AvlTreeNode<ValueType> *x,
 /*
 * AVL TREE ROTATE RIGHT
 */
-template <typename ValueType>
-inline AvlTreeNode<ValueType>*
-avlTreeRotateRight(AvlTreeNode<ValueType>* x,
-									 AvlTreeNode<ValueType>*& root) {
+template <typename K, typename V, typename KoV, typename C, typename A>
+inline typename AvlTree<K, V, KoV, C, A>::link_type
+AvlTree<K, V, KoV, C, A>::rotate_right(link_type x) {
 	assert(x != nullptr);
 	assert(x->left != nullptr);
-	AvlTreeNode<ValueType> *z = x->left;
+	link_type z = x->left;
+
 	x->left = z->right;
 	if (z->right != nullptr) {
 		z->right->parent = x;
 	}
 	z->parent = x->parent;
-	if (x == root) {
-		root = z;
+	if (x == root()) {
+		root() = z;
 	} else if (x->parent->left == x) {
 		x->parent->left = z;
 	} else {
@@ -922,15 +905,14 @@ avlTreeRotateRight(AvlTreeNode<ValueType>* x,
 /*
 *  AVL TREE ROTATE RIGHT-LEFT
 */
-template <typename ValueType>
-inline AvlTreeNode<ValueType>*
-avlTreeRotateRightLeft(AvlTreeNode<ValueType> *x,
-											 AvlTreeNode<ValueType>*& root) {
+template <typename K, typename V, typename KoV, typename C, typename A>
+inline typename AvlTree<K, V, KoV, C, A>::link_type
+AvlTree<K, V, KoV, C, A>::rotate_right_left(link_type x) {
 	assert(x != nullptr);
 	assert(x->right != nullptr);
 	assert(x->right->left != nullptr);
-	AvlTreeNode<ValueType> *z = x->right;
-	AvlTreeNode<ValueType> *y = z->left;
+	link_type z = x->right;
+	link_type y = z->left;
 
 	z->left = y->right;
 	if (y->right != nullptr) {
@@ -944,8 +926,8 @@ avlTreeRotateRightLeft(AvlTreeNode<ValueType> *x,
 		y->left->parent = x;
 	}
 	y->parent = x->parent;
-	if (x == root) {
-		root = y;
+	if (x == root()) {
+		root() = y;
 	} else if (x == x->parent->left) {
 		x->parent->left = y;
 	} else {
@@ -972,15 +954,14 @@ avlTreeRotateRightLeft(AvlTreeNode<ValueType> *x,
 /*
 *   AVL TREE ROTATE LEFT-RIGHT
 */
-template <typename ValueType>
-inline AvlTreeNode<ValueType>*
-avlTreeRotateLeftRight(AvlTreeNode<ValueType> *x,
-											 AvlTreeNode<ValueType>*& root) {
+template <typename K, typename V, typename KoV, typename C, typename A>
+inline typename AvlTree<K, V, KoV, C, A>::link_type
+AvlTree<K, V, KoV, C, A>::rotate_left_right(link_type x) {
 	assert(x != nullptr);
 	assert(x->left != nullptr);
 	assert(x->left->right != nullptr);
-	AvlTreeNode<ValueType> *z = x->left;
-	AvlTreeNode<ValueType> *y = z->right;
+	link_type z = x->left;
+	link_type y = z->right;
 
 	z->right = y->left;
 	if (y->left != nullptr) {
@@ -994,8 +975,8 @@ avlTreeRotateLeftRight(AvlTreeNode<ValueType> *x,
 		y->right->parent = x;
 	}
 	y->parent = x->parent;
-	if (x == root) {
-		root = y;
+	if (x == root()) {
+		root() = y;
 	} else if (x == x->parent->left) {
 		x->parent->left = y;
 	} else {
@@ -1028,9 +1009,9 @@ void AvlTree<K, V, KoV, C, A>::insert_rebalance(link_type z) {
 		if (z == right(x)) {
 			if (balance_factor(x) > 0) {
 				if (balance_factor(z) < 0) {
-					avlTreeRotateRightLeft(x, root());
+					rotate_right_left(x);
 				} else {
-					avlTreeRotateLeft(x, root());
+					rotate_left(x);
 				}
 			} else {
 				if (balance_factor(x) < 0) {
@@ -1045,9 +1026,9 @@ void AvlTree<K, V, KoV, C, A>::insert_rebalance(link_type z) {
 		} else {
 			if (balance_factor(x) < 0) {
 				if (balance_factor(z) > 0) {
-					avlTreeRotateLeftRight(x, root());
+					rotate_left_right(x);
 				} else {
-					avlTreeRotateRight(x, root());
+					rotate_right(x);
 				}
 			} else {
 				if (balance_factor(x) > 0) {
@@ -1063,6 +1044,130 @@ void AvlTree<K, V, KoV, C, A>::insert_rebalance(link_type z) {
 		break;
 	}
 }
+
+template <typename K, typename V, typename KoV, typename C, typename A>
+void AvlTree<K, V, KoV, C, A>::erase_rebalance(link_type n, int left_side) {
+	link_type x = nullptr;
+	link_type z = nullptr;
+	link_type g = nullptr;
+	int bf = 0;
+
+	//std::cout << "start prebalance\n";
+	//std::cout << "start prebalance key = " << key(n) << '\n';
+	//std::cout << "start prebalance bf = " << balance_factor(n) << '\n';
+	//std::cout << "start side = " << (left_side ? "left\n" : "right\n");
+	if (left_side) {
+		if (balance_factor(n) < 0) {
+			balance_factor(n) = 0;
+		} else if (balance_factor(n) == 0) {
+			balance_factor(n) = +1;
+			return;
+		} else {
+			link_type z = right(n);              // Sibling of N (higher by 2);
+			assert(z != nullptr);
+			int bf = balance_factor(z);
+			if (bf < 0) {                        // Right-Left case;
+				n = rotate_right_left(n);
+			} else {                             // Right-Right case;
+				n = rotate_left(n);
+			}
+			if (bf == 0) return;
+		}
+	} else {
+		if (balance_factor(n) > 0) {
+			balance_factor(n) = 0;
+		} else if (balance_factor(n) == 0) {
+			balance_factor(n) = -1;
+			return;
+		} else {
+			link_type z = left(n);                         // sibling of n (higher by 2);
+			assert(z != nullptr);
+			bf = balance_factor(z);
+			if (bf > 0) {                        // Left-Right case;
+				n = rotate_left_right(n);
+			} else {                             // Left-Left case;
+				n = rotate_right(n);
+			}
+			if (bf == 0) return;
+		}
+	}
+	//std::cout << "end prebalance\n";
+
+	//std::cout << "start balance key = " << key(n) << '\n';
+	//std::cout << "start balance bf = " << balance_factor(n) << '\n';
+	for (x = parent(n); x != head_; x = g) {
+		g = parent(x);                           // Save parent of x around rotations
+		if (n == left(x)) {                      // the left subtree decreases;
+			//std::cout << "left_case start\n";
+			assert(x != nullptr);
+			assert(n != nullptr);
+			if (balance_factor(x) > 0) {					 // x is right-heavy;
+			                                       // The temorary bf of x == +2;
+                                             // rebalancing is required;
+				link_type z = right(x);              // Sibling of N (higher by 2);
+				assert(z != nullptr);
+				int bf = balance_factor(z);
+				if (bf < 0) {                        // Right-Left case;
+					n = rotate_right_left(x);
+				} else {                             // Right-Right case;
+					n = rotate_left(x);
+				}
+				if (bf == 0) break;
+				//std::cout << "left_case end\n";
+			} else if (balance_factor(x) == 0) {   // n's height decrease is absorbed at x;
+					balance_factor(x) = 1;
+					// std::cout << "left_case end\n";
+					break;
+			} else {                               // balance_factor(x) < 0;
+				n = x;
+				balance_factor(n) = 0;               // Height of n decreases by 1;
+				//std::cout << "left_case end\n";
+				continue;
+			}
+		} else {                                 // the right subtree decreases;
+			//std::cout << "right_case start\n";
+			assert(x != nullptr);
+			assert(n != nullptr);
+			if (balance_factor(x) < 0) {           // x is left-heavy;
+                                             // the temporary bf of x == -2;
+																						 // rebalancing is required;
+				z = left(x);                         // sibling of n (higher by 2);
+				assert(z != nullptr);
+				bf = balance_factor(z);
+				if (bf > 0) {                        // Left-Right case;
+					n = rotate_left_right(x);
+				} else {                             // Left-Left case;
+					n = rotate_right(x);
+				}
+				if (bf == 0) break;
+				//std::cout << "right_case end\n";
+			} else if (balance_factor(x) == 0) {   // n's height decrease by 1;
+					balance_factor(x) = -1;
+					//std::cout << "right_case end\n";
+					break;
+			} else {                               // balance_factor(x) > 0;
+				n = x;
+				balance_factor(n) = 0;               // height of n decreases by 1;
+				//std::cout << "right_case end\n";
+				continue;
+			}
+		}
+
+		//if (bf == 0) {                           // height does not changed
+		//	break;
+		//}
+	}
+}
+
+
+
+
+
+
+
+
+
+
 
 /*
 template <typename K, typename V, typename KoV, typename C, typename A>
@@ -1093,11 +1198,11 @@ void AvlTree<K, V, KoV, C, A>::erase_aux(link_type z) {
 					link_type tmp = rotated_node->right;
 					assert(rotated_node->right != nullptr);
 					if (balance_factor(tmp) < 0) {
-						rotated_node = avlTreeRotateRightLeft(rotated_node, root());
+						rotated_node = rotate_right_left(rotated_node);
 					} else if (balance_factor(tmp) > 0) {
-						rotated_node = avlTreeRotateLeft(rotated_node, root());
+						rotated_node = rotate_left(rotated_node);
 					} else {
-						rotated_node = avlTreeRotateLeft(rotated_node, root());
+						rotated_node = rotate_left(rotated_node)
 					}
 				}
 			} else {
@@ -1112,11 +1217,11 @@ void AvlTree<K, V, KoV, C, A>::erase_aux(link_type z) {
 					link_type tmp = rotated_node->left;
 					assert(rotated_node->left != nullptr);
 					if (balance_factor(tmp) > 0) {
-						rotated_node = avlTreeRotateLeftRight(rotated_node, root());
+						rotated_node = rotate_left_right(rotated_node);
 					} else if (balance_factor(tmp) < 0) {
-						rotated_node = avlTreeRotateRight(rotated_node, root());
+						rotated_node = rotate_right(rotated_node);
 					} else {
-						rotated_node = avlTreeRotateRight(rotated_node, root());
+						rotated_node = rotate_right(rotated_node);
 					}
 				}
 		}
@@ -1252,124 +1357,7 @@ void AvlTree<K, V, KoV, C, A>::erase_aux(link_type z) {
 
 	destroy_node(z);
 }
-*/
 
-template <typename K, typename V, typename KoV, typename C, typename A>
-void AvlTree<K, V, KoV, C, A>::erase_rebalance(link_type n, int left_side) {
-	link_type x = nullptr;
-	link_type z = nullptr;
-	link_type g = nullptr;
-	int bf = 0;
-
-	//std::cout << "start prebalance\n";
-	//std::cout << "start prebalance key = " << key(n) << '\n';
-	//std::cout << "start prebalance bf = " << balance_factor(n) << '\n';
-	//std::cout << "start side = " << (left_side ? "left\n" : "right\n");
-	if (left_side) {
-		if (balance_factor(n) < 0) {
-			balance_factor(n) = 0;
-		} else if (balance_factor(n) == 0) {
-			balance_factor(n) = +1;
-			return;
-		} else {
-			link_type z = right(n);              // Sibling of N (higher by 2);
-			assert(z != nullptr);
-			int bf = balance_factor(z);
-			if (bf < 0) {                        // Right-Left case;
-				n = avlTreeRotateRightLeft(n, root());
-			} else {                             // Right-Right case;
-				n = avlTreeRotateLeft(n, root());
-			}
-			if (bf == 0) return;
-		}
-	} else {
-		if (balance_factor(n) > 0) {
-			balance_factor(n) = 0;
-		} else if (balance_factor(n) == 0) {
-			balance_factor(n) = -1;
-			return;
-		} else {
-			link_type z = left(n);                         // sibling of n (higher by 2);
-			assert(z != nullptr);
-			bf = balance_factor(z);
-			if (bf > 0) {                        // Left-Right case;
-				n = avlTreeRotateLeftRight(n, root());
-			} else {                             // Left-Left case;
-				n = avlTreeRotateRight(n, root());
-			}
-			if (bf == 0) return;
-		}
-	}
-	//std::cout << "end prebalance\n";
-
-	//std::cout << "start balance key = " << key(n) << '\n';
-	//std::cout << "start balance bf = " << balance_factor(n) << '\n';
-	for (x = parent(n); x != head_; x = g) {
-		g = parent(x);                           // Save parent of x around rotations
-		if (n == left(x)) {                      // the left subtree decreases;
-			//std::cout << "left_case start\n";
-			assert(x != nullptr);
-			assert(n != nullptr);
-			if (balance_factor(x) > 0) {					 // x is right-heavy;
-			                                       // The temorary bf of x == +2;
-                                             // rebalancing is required;
-				link_type z = right(x);              // Sibling of N (higher by 2);
-				assert(z != nullptr);
-				int bf = balance_factor(z);
-				if (bf < 0) {                        // Right-Left case;
-					n = avlTreeRotateRightLeft(x, root());
-				} else {                             // Right-Right case;
-					n = avlTreeRotateLeft(x, root());
-				}
-				if (bf == 0) break;
-				//std::cout << "left_case end\n";
-			} else if (balance_factor(x) == 0) {   // n's height decrease is absorbed at x;
-					balance_factor(x) = 1;
-					// std::cout << "left_case end\n";
-					break;
-			} else {                               // balance_factor(x) < 0;
-				n = x;
-				balance_factor(n) = 0;               // Height of n decreases by 1;
-				//std::cout << "left_case end\n";
-				continue;
-			}
-		} else {                                 // the right subtree decreases;
-			//std::cout << "right_case start\n";
-			assert(x != nullptr);
-			assert(n != nullptr);
-			if (balance_factor(x) < 0) {           // x is left-heavy;
-                                             // the temporary bf of x == -2;
-																						 // rebalancing is required;
-				z = left(x);                         // sibling of n (higher by 2);
-				assert(z != nullptr);
-				bf = balance_factor(z);
-				if (bf > 0) {                        // Left-Right case;
-					n = avlTreeRotateLeftRight(x, root());
-				} else {                             // Left-Left case;
-					n = avlTreeRotateRight(x, root());
-				}
-				if (bf == 0) break;
-				//std::cout << "right_case end\n";
-			} else if (balance_factor(x) == 0) {   // n's height decrease by 1;
-					balance_factor(x) = -1;
-					//std::cout << "right_case end\n";
-					break;
-			} else {                               // balance_factor(x) > 0;
-				n = x;
-				balance_factor(n) = 0;               // height of n decreases by 1;
-				//std::cout << "right_case end\n";
-				continue;
-			}
-		}
-
-		//if (bf == 0) {                           // height does not changed
-		//	break;
-		//}
-	}
-}
-	
-
-/*
 template <typename K, typename V, typename KoV, typename C, typename A>
 void AvlTree<K, V, KoV, C, A>::erase_rebalance(link_type n) {
 	link_type x = nullptr;
@@ -1390,9 +1378,9 @@ void AvlTree<K, V, KoV, C, A>::erase_rebalance(link_type n) {
 				assert(z != nullptr);
 				int bf = balance_factor(z);
 				if (bf < 0) {                        // Right-Left case;
-					n = avlTreeRotateRightLeft(x, root());
+					n = rotate_right_left(x);
 				} else {                             // Right-Right case;
-					n = avlTreeRotateLeft(x, root());
+					n = rotate_left(x);
 				}
 				std::cout << "left_case end\n";
 			} else if (balance_factor(x) == 0) {   // n's height decrease is absorbed at x;
@@ -1416,9 +1404,9 @@ void AvlTree<K, V, KoV, C, A>::erase_rebalance(link_type n) {
 				assert(z != nullptr);
 				bf = balance_factor(z);
 				if (bf > 0) {                        // Left-Right case;
-					n = avlTreeRotateLeftRight(x, root());
+					n = rotate_left_right(x);
 				} else {                             // Left-Left case;
-					n = avlTreeRotateRight(x, root());
+					n = rotate_right(x);
 				}
 				std::cout << "right_case end\n";
 			} else if (balance_factor(x) == 0) {   // n's height decrease by 1;
