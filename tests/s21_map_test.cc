@@ -52,6 +52,8 @@ class MapTest : public ::testing::Test {
 	bool MapEqual(const s21::map<Key, Value>&lhs, const s21::map<Key, Value> rhs) {
 		return lhs.empty() == rhs.empty() &&
 					 lhs.size() == rhs.size() &&
+					 lhs.verify() == 0 &&
+					 rhs.verify() == 0 &&
 					 std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 	}
 	template <typename Key, typename Value>
