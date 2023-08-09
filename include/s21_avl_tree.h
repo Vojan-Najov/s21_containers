@@ -277,6 +277,10 @@ class AvlTree final {
 	iterator find(const key_type& key);
 	const_iterator find(const key_type& x) const;
 	bool contains(const key_type& key) const;
+
+ public:
+	size_t height(link_type x) const;
+	int verify(void) const;
 	
  private:
 	link_type& root(void) const { return head_->parent; }
@@ -322,11 +326,6 @@ class AvlTree final {
 	key_of_value key_select_;
 	size_type node_count_;
 	link_type head_;
-
- public:
-	void TestTree(void);
-	size_t height(link_type x) const;
-	int verify(void) const;
 };
 
 
@@ -1100,7 +1099,7 @@ void AvlTree<K, V, KoV, C, A>::erase_rebalance(link_type x, int left_side) {
 }
 
 
-// verify test
+// verify method for debug
 
 template <typename K, typename V, typename KoV, typename C, typename A>
 size_t AvlTree<K, V, KoV, C, A>::height(link_type x) const {
@@ -1130,11 +1129,6 @@ int AvlTree<K, V, KoV, C, A>::verify(void) const {
 			return 4;
 		if (head_->parent != nullptr)
 			return 5;
-		/*
-		return (node_count_ == 0 && begin() == end() &&
-						head_->left == head_ && head_->right == head_ &&
-					  head_->parent == nullptr);
-		*/
 	}
 
 	for (const_iterator it = begin(); it != end(); ++it) {
@@ -1148,16 +1142,10 @@ int AvlTree<K, V, KoV, C, A>::verify(void) const {
 		}
 		size_t h_l = height(it.node_->left);
 		size_t h_r = height(it.node_->right);
-		//std::cout << "right subtree height " << h_r << '\n';
-		//std::cout << "left subtree height " << h_l << '\n';
 		int bf = h_r - h_l;
 		if (bf > 1) return 8;
 	 	if (bf < -1) return 9;
 		if (bf != balance_factor(it.node_)) {
-			std::cout << "incorrect node is " << key(it.node_) << "\n";
-			std::cout << "incorrect bf is " << balance_factor(it.node_) << "\n";
-			std::cout << "right height = " << h_r << '\n';
-			std::cout << "left  height = " << h_l << '\n';
 			return 10;
 		}
 	}
