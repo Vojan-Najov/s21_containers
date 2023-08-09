@@ -54,24 +54,24 @@ class map final {
 		if (it == end()) {
 			throw std::out_of_range("Invalid key.");
 		}
-		return *it;
+		return (*it).second;
 	}
 	const mapped_type& at(const key_type& key) const {
-		iterator it = find(key);
+		const_iterator it = find(key);
 		if (it == end()) {
 			throw std::out_of_range("Invalid key.");
 		}
-		return *it;
+		return (*it).second;
 	}
 	mapped_type& operator[](const key_type &key) {
 		iterator it = find(key);
 		if (it == end()) {
-			std::pair<iterator, bool> result = tree_.insert(key, mapped_type());
+			std::pair<iterator, bool> result =
+				tree_.insert_unique(std::make_pair(key, mapped_type()));
 			it = result.first;
 		}
 		return (*it).second;
 	}
-
 
  public:
 	iterator begin(void) noexcept { return tree_.begin(); }
@@ -88,34 +88,42 @@ class map final {
 
  public:
 	void clear(void) { tree_.clear(); }
+
 	std::pair<iterator, bool> insert(const_reference value) {
 		return tree_.insert_unique(value);
 	}
+
 	std::pair<iterator, bool> insert(const key_type& key, const mapped_type& value) {
 		return tree_.insert_unique(std::make_pair(key, value));
 	}
+
 	std::pair<iterator, bool>
-	insert_or_assign(const key_type& key, const mapped_type& value) {
+	insert_or_assign(const key_type& key, mapped_type&& value) {
 		iterator it = find(key);
 		if (it != end()) {
-			(*it).second = std::forward(value);
+			(*it).second = std::forward<mapped_type>(value);
 			return std::make_pair(it, false);
 		} else {
 			return insert(key, value);
 		}
 	}
+
 	void erase(iterator position) { tree_.erase(position); }
+
+	void swap(map &other) noexcept { tree_.swap(other.tree_); }
 
  public:
 	iterator find(const key_type& key) { return tree_.find(key); }
 	const_iterator find(const key_type& key) const { return tree_.find(key); }
 	bool contains(const Key& key) const { return tree_.contains(key); }
 
+#ifdef DEBUG
+ public:
+	int verify(void) const { return tree_.verify(); }
+#endif
+
  private:
 	BinaryTree tree_;
-
- public:
-	int verify(void) { return tree_.verify(); }
 };
 
 } // namespace s21
