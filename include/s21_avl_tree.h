@@ -272,6 +272,7 @@ class AvlTree final {
 	iterator insert_equal(const_reference value);
 	void erase(iterator position);
 	void erase(const_iterator position);
+	void merge(AvlTree &sourse);
 
  public:
 	iterator find(const key_type& key);
@@ -308,8 +309,8 @@ class AvlTree final {
 	link_type copy(link_type node, link_type node_parent);
 	void erase_subtree(link_type node);
 	link_type find_node(const key_type& key) const;
-	iterator insert_aux(link_type x, link_type y, const_reference value);
-	void erase_aux(link_type z);
+	iterator insert_aux(link_type x, link_type z);
+	link_type erase_aux(link_type z);
 
  private:
 	link_type rotate_left(link_type x);
@@ -455,19 +456,21 @@ AvlTree<K, V, KoV, C, A>::insert_unique(const_reference value) {
 	iterator j = iterator(y);
 	if (comp) {
 		if (j == begin()) {
-			return std::pair<iterator, bool>(insert_aux(x, y, value), true);
+			link_type z = create_node(value);
+			return std::make_pair(insert_aux(y, z), true);
 		} else {
 			--j;
 		}
 	}
 	if (key_compare_(key(j.node_), new_key)) {
-		return std::pair<iterator, bool>(insert_aux(x, y, value), true);
+		link_type z = create_node(value);
+		return std::make_pair(insert_aux(y, z), true);
 	}
 	return std::pair<iterator, bool>(j, false);
 }
 
 template <typename K, typename V, typename KoV, typename C, typename A>
-typename AvlTree<K, V, KoV, C, A>::iterator
+inline typename AvlTree<K, V, KoV, C, A>::iterator
 AvlTree<K, V, KoV, C, A>::insert_equal(const_reference value) {
 	link_type y = head_;
 	link_type x = root();
@@ -477,19 +480,46 @@ AvlTree<K, V, KoV, C, A>::insert_equal(const_reference value) {
 		y = x;
 		x = key_compare_(new_key, key(x)) ? left(x) : right(x);
 	}
-	return insert_aux(x, y, value);
+
+	link_type z = create_node(value);
+	return insert_aux(y, z);
 }
 
 template <typename K, typename V, typename KoV, typename C, typename A>
-void AvlTree<K, V, KoV, C, A>::erase(iterator position) {
-	erase_aux(position.node_);
-	--node_count_;
+inline void AvlTree<K, V, KoV, C, A>::erase(iterator position) {
+	link_type z = erase_aux(position.node_);
+	destroy_node(z);
 }
 
 template <typename K, typename V, typename KoV, typename C, typename A>
-void AvlTree<K, V, KoV, C, A>::erase(const_iterator position) {
-	erase_aux(position.node_);
-	--node_count_;
+inline void AvlTree<K, V, KoV, C, A>::erase(const_iterator position) {
+	link_type z = erase_aux(position.node_);
+	destroy_node(z);
+}
+
+template <typename K, typename V, typename KoV, typename C, typename A>
+inline void AvlTree<K, V, KoV, C, A>::merge(AvlTree &source) {
+	iterator it = source.begin();
+	iterator last = source.end();
+
+	while (it != last) {
+		link_type z = it.node_;
+		++it;
+		if (find_node(key(z)) == head_) {
+			link_type y = head_;
+			link_type x = root();
+			while (x != nullptr) {
+				y = x;
+				x = key_compare_(key(z), key(x)) ? left(x) : right(x);	
+			}
+			z = source.erase_aux(z);
+			auto t = source.begin();
+			right(z) = nullptr;
+			left(z) = nullptr;
+			balance_factor(z) = 0;
+			insert_aux(y, z);
+		}
+	}
 }
 
 
@@ -544,6 +574,7 @@ AvlTree<K, V, KoV, C, A>::find(const key_type& key) const {
 /*
 *  Check if there is an element with key equivalent to key in the container.
 */
+
 template <typename K, typename V, typename KoV, typename C, typename A>
 inline bool
 AvlTree<K, V, KoV, C, A>::contains(const key_type& key) const {
@@ -723,26 +754,24 @@ AvlTree<K, V, KoV, C, A>::find_node(const key_type& looking_key) const {
 */
 template <typename K, typename V, typename KoV, typename C, typename A>
 typename AvlTree<K, V, KoV, C, A>::iterator
-AvlTree<K, V, KoV, C, A>::insert_aux(link_type x,
-																		 link_type y, const_reference value) {
-	link_type z = create_node(value);
-	key_type new_key = key_select_(value);
+AvlTree<K, V, KoV, C, A>::insert_aux(link_type x, link_type z) {
+	key_type new_key = key(z);
 
-	if (y == head_ || x != nullptr || key_compare_(new_key, key(y))) {
-		left(y) = z;
-		if (y == head_) {
+	if (x == head_ || key_compare_(new_key, key(x))) {
+		left(x) = z;
+		if (x == head_) {
 			root() = z;
 			rightmost() = z;
-		} else if (y == leftmost()) {
+		} else if (x == leftmost()) {
 			leftmost() = z;
 		}
 	} else {
-		right(y) = z;
-		if (y == rightmost()) {
+		right(x) = z;
+		if (x == rightmost()) {
 			rightmost() = z;
 		}
 	}
-	parent(z) = y;
+	parent(z) = x;
 	insert_rebalance(z);
 	++node_count_;
 
@@ -753,7 +782,8 @@ AvlTree<K, V, KoV, C, A>::insert_aux(link_type x,
 *  Deleting a node "z" with subsequent rebalancing.
 */
 template <typename K, typename V, typename KoV, typename C, typename A>
-void AvlTree<K, V, KoV, C, A>::erase_aux(link_type z) {
+typename AvlTree<K, V, KoV, C, A>::link_type
+AvlTree<K, V, KoV, C, A>::erase_aux(link_type z) {
 	link_type y = nullptr;
 	link_type x = nullptr;
 	link_type node_for_balance = nullptr;
@@ -823,7 +853,9 @@ void AvlTree<K, V, KoV, C, A>::erase_aux(link_type z) {
 		rightmost() = head_;
 	}
 
-	destroy_node(z);
+	--node_count_;
+
+	return z;
 }
 
 
