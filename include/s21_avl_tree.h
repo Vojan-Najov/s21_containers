@@ -1045,6 +1045,134 @@ void AvlTree<K, V, KoV, C, A>::insert_rebalance(link_type z) {
 	}
 }
 
+/*
+*  Rebalancing after erasing.
+*/
+template <typename K, typename V, typename KoV, typename C, typename A>
+void AvlTree<K, V, KoV, C, A>::erase_rebalance(link_type x, int left_side) {
+	while (x != head_) {
+		if (left_side) {
+			if (balance_factor(x) < 0) {
+				balance_factor(x) = 0;
+			} else if (balance_factor(x) == 0) {
+				balance_factor(x) = 1;
+				break;
+			} else {
+				link_type z = right(x);
+				int bf = balance_factor(z);
+				if (bf < 0) {
+					x = rotate_right_left(x);
+				} else {
+					x = rotate_left(x);
+					if (bf == 0) {
+						break;
+					}
+				}
+			}
+		} else {
+			if (balance_factor(x) > 0) {
+				balance_factor(x) = 0;
+			} else if (balance_factor(x) == 0) {
+				balance_factor(x) = -1;
+				break;
+			} else {
+				link_type z = left(x);
+				int bf = balance_factor(z);
+				if (bf > 0 ) {
+					x = rotate_left_right(x);
+				} else {
+					x = rotate_right(x);
+					if (bf == 0) {
+						break;
+					}
+				}
+			}
+		}
+
+		link_type g = parent(x);
+		if (x == left(g)) {
+			left_side = 1;
+		} else {
+			left_side = 0;
+		}
+		x = g;
+	}
+}
+
+
+// verify test
+
+template <typename K, typename V, typename KoV, typename C, typename A>
+size_t AvlTree<K, V, KoV, C, A>::height(link_type x) const {
+	size_t h = 0;
+	if (x == nullptr)
+		return 0;
+	size_t h_r = height(x->right);
+	size_t h_l = height(x->left);
+	if (h_r > h_l) {
+		h = h_r + 1;
+	} else {
+		h = h_l + 1;
+	}
+	return h;
+}
+
+template <typename K, typename V, typename KoV, typename C, typename A>
+int AvlTree<K, V, KoV, C, A>::verify(void) const {
+	if (node_count_ == 0 || begin() == end()) {
+		if (node_count_ != 0)
+			return 1;
+		if (begin() != end()) 
+			return 2;
+		if (head_->left != head_)
+			return 3;
+		if (head_->right != head_)
+			return 4;
+		if (head_->parent != nullptr)
+			return 5;
+		/*
+		return (node_count_ == 0 && begin() == end() &&
+						head_->left == head_ && head_->right == head_ &&
+					  head_->parent == nullptr);
+		*/
+	}
+
+	for (const_iterator it = begin(); it != end(); ++it) {
+		if (it.node_->left) {
+			if (key_compare_(key(it.node_), key(it.node_->left)))
+				return 6;
+		}
+		if (it.node_->right) {
+			if (key_compare_(key(it.node_->right), key(it.node_)))
+				return 7;
+		}
+		size_t h_l = height(it.node_->left);
+		size_t h_r = height(it.node_->right);
+		//std::cout << "right subtree height " << h_r << '\n';
+		//std::cout << "left subtree height " << h_l << '\n';
+		int bf = h_r - h_l;
+		if (bf > 1) return 8;
+	 	if (bf < -1) return 9;
+		if (bf != balance_factor(it.node_)) {
+			std::cout << "incorrect node is " << key(it.node_) << "\n";
+			std::cout << "incorrect bf is " << balance_factor(it.node_) << "\n";
+			std::cout << "right height = " << h_r << '\n';
+			std::cout << "left  height = " << h_l << '\n';
+			return 10;
+		}
+	}
+
+	if (root() != nullptr) {
+		if (leftmost() != minimum(root())) return 11;
+		if (rightmost() != maximum(root())) return 12;
+	}
+
+	return 0;
+}
+
+
+
+/*
 template <typename K, typename V, typename KoV, typename C, typename A>
 void AvlTree<K, V, KoV, C, A>::erase_rebalance(link_type n, int left_side) {
 	link_type x = nullptr;
@@ -1159,17 +1287,6 @@ void AvlTree<K, V, KoV, C, A>::erase_rebalance(link_type n, int left_side) {
 	}
 }
 
-
-
-
-
-
-
-
-
-
-
-/*
 template <typename K, typename V, typename KoV, typename C, typename A>
 void AvlTree<K, V, KoV, C, A>::erase_aux(link_type z) {
 	link_type y = z;
@@ -1272,312 +1389,10 @@ void AvlTree<K, V, KoV, C, A>::erase_aux(link_type z) {
 	destroy_node(z);
 }
 	
-template <typename K, typename V, typename KoV, typename C, typename A>
-void AvlTree<K, V, KoV, C, A>::erase_aux(link_type z) {
-	link_type y = z;
-	link_type x = nullptr;
-	link_type node_for_balance = nullptr;
-
-	enum {right = 0, left = 1} side;
-
-	if (y->right == nullptr) {
-		node_for_balance = z->parent;
-		x = y->left;
-		if (x != nullptr) {
-			x->parent = y->parent;
-		}
-		if (root() == z) {
-			root() = x;
-		} else if (z == z->parent->left) {
-			side = left;
-			z->parent->left = x;
-		} else {
-			side = right;
-			z->parent->right = x;
-		}
-	} else if (y->left == nullptr) {
-		node_for_balance = z->parent;
-		x = y->right;
-		if (x != nullptr) {
-			x->parent = y->parent;
-		}
-		if (root() == z) {
-			root() = x;
-		} else if (z == z->parent->left) {
-			side = left;
-			z->parent->left = x;
-		} else {
-			side = right;
-			z->parent->right = x;
-		}
-	} else {
-		y = y->right;
-		while (y->left != nullptr) {
-			y = y->left;
-		}
-		x = y->right;
-		if (z->left != nullptr) {
-			z->left->parent = y;
-		}
-		y->left = z->left;
-		if (y == z->right) {
-			node_for_balance = y;
-			side = right;
-		} else {
-			node_for_balance = y->parent;
-			side = left;
-			if (x != nullptr) {
-				x->parent = y->parent;
-			}
-			y->parent->left = x;
-			y->right = z->right;
-			z->right->parent = y;
-		}
-		if (root() == z) {
-			root() = y;
-		} else if (z->parent->left == z) {
-			z->parent->left = y;
-		} else {
-			z->parent->right = y;
-		}
-		y->parent = z->parent;
-		y->balance_factor = z->balance_factor;
-	}
-
-	if (node_for_balance != head_)
-		erase_rebalance(node_for_balance, side);
-
-	if (root() != nullptr) {
-		leftmost() = minimum(root());
-		rightmost() = maximum(root());
-	} else {
-		leftmost() = head_;
-		rightmost() = head_;
-	}
-
-	destroy_node(z);
-}
-
-template <typename K, typename V, typename KoV, typename C, typename A>
-void AvlTree<K, V, KoV, C, A>::erase_rebalance(link_type n) {
-	link_type x = nullptr;
-	link_type z = nullptr;
-	link_type g = nullptr;
-	int bf = 0;
-
-	for (x = parent(n); x != head_; x = g) {
-		g = parent(x);                           // Save parent of x around rotations
-		if (n == left(x)) {                      // the left subtree decreases;
-			std::cout << "left_case start\n";
-			assert(x != nullptr);
-			assert(n != nullptr);
-			if (balance_factor(x) > 0) {					 // x is right-heavy;
-			                                       // The temorary bf of x == +2;
-                                             // rebalancing is required;
-				link_type z = right(x);              // Sibling of N (higher by 2);
-				assert(z != nullptr);
-				int bf = balance_factor(z);
-				if (bf < 0) {                        // Right-Left case;
-					n = rotate_right_left(x);
-				} else {                             // Right-Right case;
-					n = rotate_left(x);
-				}
-				std::cout << "left_case end\n";
-			} else if (balance_factor(x) == 0) {   // n's height decrease is absorbed at x;
-					balance_factor(x) = 1;
-					std::cout << "left_case end\n";
-					break;
-			} else {                               // balance_factor(x) < 0;
-				n = x;
-				balance_factor(n) = 0;               // Height of n decreases by 1;
-				std::cout << "left_case end\n";
-				continue;
-			}
-		} else {                                 // the right subtree decreases;
-			std::cout << "right_case start\n";
-			assert(x != nullptr);
-			assert(n != nullptr);
-			if (balance_factor(x) < 0) {           // x is left-heavy;
-                                             // the temporary bf of x == -2;
-																						 // rebalancing is required;
-				z = left(x);                         // sibling of n (higher by 2);
-				assert(z != nullptr);
-				bf = balance_factor(z);
-				if (bf > 0) {                        // Left-Right case;
-					n = rotate_left_right(x);
-				} else {                             // Left-Left case;
-					n = rotate_right(x);
-				}
-				std::cout << "right_case end\n";
-			} else if (balance_factor(x) == 0) {   // n's height decrease by 1;
-					balance_factor(x) = -1;
-					std::cout << "right_case end\n";
-					break;
-			} else {                               // balance_factor(x) > 0;
-				n = x;
-				balance_factor(n) = 0;               // height of n decreases by 1;
-				std::cout << "right_case end\n";
-				continue;
-			}
-		}
-
-		if (bf == 0) {                           // height does not changed
-			break;
-		}
-	}
-}
-
-template <typename K, typename V, typename KoV, typename C, typename A>
-void AvlTree<K, V, KoV, C, A>::erase_aux(link_type z) {
-	link_type y = z;
-	link_type x = nullptr;
-	link_type x_parent = nullptr;
-
-	if (y->left == nullptr) {         // z has at most one non-null child (y == z)
-		x = y->right;                   // x might be a null
-	} else {
-		if (y->right == nullptr) {      // z has exactly one non-null child (y == z)
-			x = y->left;                  // x is not null
-		} else {                        // z has two non-null childs
-			y = y->right;                 // set y to z's successor
-			while (y->left != nullptr) {
-				y = y->left;  
-			}
-			x = y->right;                 // x might be a null
-		}
-	}
-
-	if (y == z) {
-		x_parent = y->parent;
-		if (x != nullptr) {
-			x->parent = y->parent;
-		}
-		if (root() == z) {
-			root() = x;
-		} else if (z->parent->left == z) {
-			z->parent->left = x;
-		} else {
-			z->parent->right = x;
-		}
-		if (leftmost() == z) {           // z->left must be a null
-			if (z->right == nullptr) {     // z has no child nodes
-				leftmost() = z->parent;
-			} else {                       // looking for the minimum in the right subtree
-				leftmost() = minimum(x);
-			}
-		}
-		if (rightmost() == z) {          // z->right must be a null
-			if (z->left == nullptr) {      // z has no child nodes
-				rightmost() = z->parent;
-			} else {                       // looking for the maximum in the left subtree
-				rightmost() = maximum(x);
-			}
-		}
-	} else {                           // y != z; y is z's successor
-		z->left->parent = y;             // z has two non-null child
-		y->left = z->left;			   			 // we link z's left child to y's left child
-		if (y == z->right) {
-			x_parent = y;
-		} else {                         // y is not z's right child
-			x_parent = y->parent;
-			if (x != nullptr) {
-				x->parent = y->parent;
-			}
-			y->parent->left = x;           // there y must be a left child
-			y->right = z->right;
-			z->right->parent = y;
-		}
-		if (root() == z) {
-			root() = y;
-		} else if (z->parent->left == z) {
-			z->parent->left = y;
-		} else {
-			z->parent->right = y;
-		}
-		y->parent = z->parent;
-		y->balance_factor = z->balance_factor;
-		y = z;                           // now y points to node to be actually deleted
-	}
-
-	if (x_parent != head_)
-		erase_rebalance(x_parent);
-
-	destroy_node(y);
-}
 */
 
 
 
-
-// verify test
-
-template <typename K, typename V, typename KoV, typename C, typename A>
-size_t AvlTree<K, V, KoV, C, A>::height(link_type x) const {
-	size_t h = 0;
-	if (x == nullptr)
-		return 0;
-	size_t h_r = height(x->right);
-	size_t h_l = height(x->left);
-	if (h_r > h_l) {
-		h = h_r + 1;
-	} else {
-		h = h_l + 1;
-	}
-	return h;
-}
-
-template <typename K, typename V, typename KoV, typename C, typename A>
-int AvlTree<K, V, KoV, C, A>::verify(void) const {
-	if (node_count_ == 0 || begin() == end()) {
-		if (node_count_ != 0)
-			return 1;
-		if (begin() != end()) 
-			return 2;
-		if (head_->left != head_)
-			return 3;
-		if (head_->right != head_)
-			return 4;
-		if (head_->parent != nullptr)
-			return 5;
-		/*
-		return (node_count_ == 0 && begin() == end() &&
-						head_->left == head_ && head_->right == head_ &&
-					  head_->parent == nullptr);
-		*/
-	}
-
-	for (const_iterator it = begin(); it != end(); ++it) {
-		if (it.node_->left) {
-			if (key_compare_(key(it.node_), key(it.node_->left)))
-				return 6;
-		}
-		if (it.node_->right) {
-			if (key_compare_(key(it.node_->right), key(it.node_)))
-				return 7;
-		}
-		size_t h_l = height(it.node_->left);
-		size_t h_r = height(it.node_->right);
-		//std::cout << "right subtree height " << h_r << '\n';
-		//std::cout << "left subtree height " << h_l << '\n';
-		int bf = h_r - h_l;
-		if (bf > 1) return 8;
-	 	if (bf < -1) return 9;
-		if (bf != balance_factor(it.node_)) {
-			std::cout << "incorrect node is " << key(it.node_) << "\n";
-			std::cout << "incorrect bf is " << balance_factor(it.node_) << "\n";
-			std::cout << "right height = " << h_r << '\n';
-			std::cout << "left  height = " << h_l << '\n';
-			return 10;
-		}
-	}
-
-	if (root() != nullptr) {
-		if (leftmost() != minimum(root())) return 11;
-		if (rightmost() != maximum(root())) return 12;
-	}
-
-	return 0;
-}
 
 } // namespace s21
 
