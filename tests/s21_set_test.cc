@@ -10,9 +10,9 @@
 class SetTest : public ::testing::Test {
  public:
 	void SetUp(void) override {
-		int set_size = 1000;
-
 		std::srand(42);
+
+		int set_size = 1000;
 		for (int i = 0; i < set_size; ++i) {
 			int key = rand();
 			std::string value = std::to_string(key + i);
@@ -25,18 +25,22 @@ class SetTest : public ::testing::Test {
 	bool SetEqual(const s21::set<Key>&lhs, const s21::set<Key> rhs) {
 		return lhs.empty() == rhs.empty() &&
 					 lhs.size() == rhs.size() &&
+					 lhs.verify() == 0 &&
+					 rhs.verify() == 0 &&
 					 std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 	}
 	template <typename Key>
 	bool SetEqual(const s21::set<Key>&lhs, const std::set<Key> rhs) {
 		return lhs.empty() == rhs.empty() &&
 					 lhs.size() == rhs.size() &&
+					 lhs.verify() == 0 &&
 					 std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 	}
 	template <typename Key>
 	bool SetEqual(const std::set<Key>&lhs, const s21::set<Key> rhs) {
 		return lhs.empty() == rhs.empty() &&
 					 lhs.size() == rhs.size() &&
+					 rhs.verify() == 0 &&
 					 std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 	}
 
@@ -488,5 +492,226 @@ TEST_F(SetTest, Capacity) {
 		EXPECT_EQ(css21.empty(), csstd.empty());
 		EXPECT_EQ(css21.size(), csstd.size());
 		EXPECT_EQ(css21.max_size(), csstd.max_size());
+	}
+}
+
+TEST_F(SetTest, Clear) {
+	{
+		s21::set<std::string> s_s21;
+		std::set<std::string> s_std;
+
+		s_s21.clear();
+		s_std.clear();
+
+		EXPECT_TRUE(SetEqual(s_s21, s_std));
+	}
+	{
+		s21::set<std::string> s_s21 = ss21;
+		std::set<std::string> s_std = sstd;
+
+		s_s21.clear();
+		s_std.clear();
+
+		EXPECT_TRUE(SetEqual(s_s21, s_std));
+	}
+	{
+		s21::set<std::string> s_s21;
+		std::set<std::string> s_std;
+
+		for (int i = 0; i < 10000; ++i) {
+			s_s21.insert(std::to_string(i));
+			s_std.insert(std::to_string(i));
+		}
+
+		s_s21.clear();
+		s_std.clear();
+
+		EXPECT_TRUE(SetEqual(s_s21, s_std));
+	}
+}
+
+TEST_F(SetTest, Insert) {
+	s21::set<double> s_s21;
+	std::set<double> s_std;
+
+	for (int i = 0; i < 100000; ++i) {
+		int key = rand() / 100000;
+		auto ps21 = s_s21.insert(static_cast<double>(key));
+		auto pstd = s_std.insert(static_cast<double>(key));
+
+		EXPECT_EQ(*ps21.first, *pstd.first);
+		EXPECT_EQ(ps21.second, pstd.second);
+	}
+
+	EXPECT_TRUE(SetEqual(s_s21, s_std));
+}
+
+TEST_F(SetTest, Erase) {
+	s21::set<int> s_s21;
+	std::set<int> s_std;
+
+	for (int i = 0; i < 100000; ++i) {
+		int key = rand() / 100000;
+		auto ps21 = s_s21.insert(key);
+		auto pstd = s_std.insert(key);
+
+		EXPECT_EQ(*ps21.first, *pstd.first);
+		EXPECT_EQ(ps21.second, pstd.second);
+	}
+
+	for (int i = 0; i < 100000; ++i) {
+		int key = rand() / 100000;
+		auto it_s21 = s_s21.find(key);
+		auto it_std = s_std.find(key);
+
+		if (it_std != s_std.end()) {
+			EXPECT_NE(it_s21, s_s21.end());
+			s_s21.erase(it_s21);
+			s_std.erase(it_std);
+		} else {
+			EXPECT_EQ(it_s21, s_s21.end());
+		}
+	}
+
+	EXPECT_TRUE(SetEqual(s_s21, s_std));
+}
+
+TEST_F(SetTest, SieveOfEratosthenes) {
+	s21::set<int> s_s21;
+	std::set<int> s_std;
+
+	for (int i = 2; i < 1000000; ++i) {
+		auto ps21 = s_s21.insert(i);
+		auto pstd = s_std.insert(i);
+
+		EXPECT_EQ(*ps21.first, *pstd.first);
+		EXPECT_EQ(ps21.second, pstd.second);
+	}
+
+	for (int i = 2; i <= 1000; ++i) {
+		auto it_s21 = s_s21.begin();
+		auto it_std = s_std.begin();
+		while (it_s21 != s_s21.end()) {
+			if (*it_s21 % i == 0) {
+				s_s21.erase(it_s21++);
+				s_std.erase(it_std++);
+			} else {
+				++it_s21;
+				++it_std;
+			}
+		}
+	}
+
+	EXPECT_TRUE(SetEqual(s_s21, s_std));
+}
+
+TEST_F(SetTest, Swap) {
+	s21::set<std::string> s_s21 = { "123", "abc", "q" };
+	std::set<std::string> s_std = { "123", "abc", "q" };
+
+	s_s21.swap(ss21);
+	s_std.swap(sstd);
+
+	EXPECT_TRUE(SetEqual(s_s21, s_std));
+	EXPECT_TRUE(SetEqual(ss21, sstd));
+}
+
+TEST_F(SetTest, Merge) {
+	{
+		s21::set<std::string> s_s21 = { "123", "abc", "q" };
+		s21::set<std::string> source_s21 =
+			{ "0", "123", "abc", "q", "qwerty", "90" };
+		std::set<std::string> s_std = { "123", "abc", "q" };
+		std::set<std::string> source_std =
+			{ "0", "123", "abc", "q", "qwerty", "90" };
+
+		s_s21.merge(source_s21);
+		s_std.merge(source_std);
+
+		EXPECT_TRUE(SetEqual(s_s21, s_std));
+		EXPECT_TRUE(SetEqual(source_s21, source_std));
+	}
+	{
+		s21::set<std::string> s_s21 = ss21;
+		s21::set<std::string> source_s21 =
+			{ "0", "123", "abc", "q", "qwerty", "90" };
+		std::set<std::string> s_std = sstd;
+		std::set<std::string> source_std =
+			{ "0", "123", "abc", "q", "qwerty", "90" };
+
+		s_s21.merge(source_s21);
+		s_std.merge(source_std);
+
+		EXPECT_TRUE(SetEqual(s_s21, s_std));
+		EXPECT_TRUE(SetEqual(source_s21, source_std));
+	}
+}
+
+TEST_F(SetTest, Find) {
+	s21::set<int> s_s21;
+	std::set<int> s_std;
+
+	for (int i = 0; i < 1000000; ++i) {
+		int key = rand() / 100000;
+		s_s21.insert(key);
+		s_std.insert(key);
+	}
+
+	for (int i = 0; i < 100000; ++i) {
+		int key = rand() / 100000;
+		auto it1 = s_s21.find(key);
+		auto it2 = s_std.find(key);
+		if (it2 != s_std.end()) {
+			EXPECT_EQ(*it1, *it2);
+		} else {
+			EXPECT_EQ(it1, s_s21.end());
+		}
+	}
+}
+
+TEST_F(SetTest, ConstFind) {
+	s21::set<int> s_s21;
+	std::set<int> s_std;
+
+	for (int i = 0; i < 1000000; ++i) {
+		int key = rand() / 100000;
+		s_s21.insert(key);
+		s_std.insert(key);
+	}
+
+	const s21::set<int> cs_s21 = std::move(s_s21);
+	const std::set<int> cs_std = std::move(s_std);
+
+	for (int i = 0; i < 100000; ++i) {
+		int key = rand() / 100000;
+		auto it1 = cs_s21.find(key);
+		auto it2 = cs_std.find(key);
+		if (it2 != cs_std.end()) {
+			EXPECT_EQ(*it1, *it2);
+		} else {
+			EXPECT_EQ(it1, cs_s21.end());
+		}
+	}
+}
+
+TEST_F(SetTest, Contains) {
+	s21::set<int> s_s21;
+	std::set<int> s_std;
+
+	for (int i = 0; i < 1000000; ++i) {
+		int key = rand() / 100000;
+		s_s21.insert(key);
+		s_std.insert(key);
+	}
+
+	const s21::set<int> cs_s21 = std::move(s_s21);
+	const std::set<int> cs_std = std::move(s_std);
+
+	for (int i = 0; i < 100000; ++i) {
+		int key = rand() / 100000;
+		bool res_s21 = cs_s21.contains(key);
+		auto it = cs_std.find(key);
+		bool res_std = (it != cs_std.end());
+		EXPECT_EQ(res_s21, res_std);
 	}
 }
