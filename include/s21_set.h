@@ -68,7 +68,7 @@ class set final {
 	}
 	void erase(iterator position) { tree_.erase(position); }
 	void swap(set& other) noexcept { tree_.swap(other.tree_); }
-	void merge(set& source) { tree_.merge(source.tree_); }
+	void merge(set& source) { tree_.merge_unique(source.tree_); }
 
  public:
 	iterator find(const_reference key) { return tree_.find(key); }
