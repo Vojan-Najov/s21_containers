@@ -49,7 +49,7 @@ class MapTest : public ::testing::Test {
 	}
 
 	template <typename Key, typename Value>
-	bool MapEqual(const s21::map<Key, Value>&lhs, const s21::map<Key, Value> rhs) {
+	bool MapEqual(const s21::map<Key, Value>& lhs, const s21::map<Key, Value>& rhs) {
 		return lhs.empty() == rhs.empty() &&
 					 lhs.size() == rhs.size() &&
 					 lhs.verify() == 0 &&
@@ -57,14 +57,14 @@ class MapTest : public ::testing::Test {
 					 std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 	}
 	template <typename Key, typename Value>
-	bool MapEqual(const s21::map<Key, Value>&lhs, const std::map<Key, Value> rhs) {
+	bool MapEqual(const s21::map<Key, Value>& lhs, const std::map<Key, Value>& rhs) {
 		return lhs.empty() == rhs.empty() &&
 					 lhs.size() == rhs.size() &&
 					 lhs.verify() == 0 &&
 					 std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 	}
 	template <typename Key, typename Value>
-	bool MapEqual(const std::map<Key, Value>&lhs, const s21::map<Key, Value> rhs) {
+	bool MapEqual(const std::map<Key, Value>& lhs, const s21::map<Key, Value>& rhs) {
 		return lhs.empty() == rhs.empty() &&
 					 lhs.size() == rhs.size() &&
 					 rhs.verify() == 0 &&
