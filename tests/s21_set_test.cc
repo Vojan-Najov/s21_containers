@@ -22,7 +22,7 @@ class SetTest : public ::testing::Test {
 	}
 
 	template <typename Key>
-	bool SetEqual(const s21::set<Key>&lhs, const s21::set<Key> rhs) {
+	bool SetEqual(const s21::set<Key>& lhs, const s21::set<Key>& rhs) {
 		return lhs.empty() == rhs.empty() &&
 					 lhs.size() == rhs.size() &&
 					 lhs.verify() == 0 &&
@@ -30,14 +30,14 @@ class SetTest : public ::testing::Test {
 					 std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 	}
 	template <typename Key>
-	bool SetEqual(const s21::set<Key>&lhs, const std::set<Key> rhs) {
+	bool SetEqual(const s21::set<Key>& lhs, const std::set<Key>& rhs) {
 		return lhs.empty() == rhs.empty() &&
 					 lhs.size() == rhs.size() &&
 					 lhs.verify() == 0 &&
 					 std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 	}
 	template <typename Key>
-	bool SetEqual(const std::set<Key>&lhs, const s21::set<Key> rhs) {
+	bool SetEqual(const std::set<Key>& lhs, const s21::set<Key>& rhs) {
 		return lhs.empty() == rhs.empty() &&
 					 lhs.size() == rhs.size() &&
 					 rhs.verify() == 0 &&
