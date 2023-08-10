@@ -112,7 +112,7 @@ class map final {
 
 	void swap(map &other) noexcept { tree_.swap(other.tree_); }
 
-	void merge(map &source) { tree_.merge(source.tree_); }
+	void merge(map &source) { tree_.merge_unique(source.tree_); }
 
  public:
 	iterator find(const key_type& key) { return tree_.find(key); }
