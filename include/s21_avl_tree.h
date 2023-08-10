@@ -9,9 +9,6 @@
 #include <iterator>
 #include <utility>
 
-#include <cassert>
-#include <iostream>
-
 namespace s21 {
 
 // AVL TREE NODE
@@ -272,12 +269,21 @@ class AvlTree final {
 	iterator insert_equal(const_reference value);
 	void erase(iterator position);
 	void erase(const_iterator position);
-	void merge(AvlTree &sourse);
+	void merge_unique(AvlTree &sourse);
+	void merge_equal(AvlTree &sourse);
 
  public:
-	iterator find(const key_type& key);
-	const_iterator find(const key_type& x) const;
-	bool contains(const key_type& key) const;
+	size_type count(const key_type& key) const noexcept;
+	iterator find(const key_type& key) noexcept;
+	const_iterator find(const key_type& x) const noexcept;
+	bool contains(const key_type& key) const noexcept;
+	std::pair<iterator, iterator> equal_range(const key_type& bound_key) noexcept;
+	std::pair<const_iterator, const_iterator>
+	equal_range(const key_type& bound_key) const noexcept;
+	iterator lower_bound(const key_type& key) noexcept;
+	const_iterator lower_bound(const key_type& key) const noexcept;
+	iterator upper_bound(const key_type& key) noexcept;
+	const_iterator upper_bound(const key_type& key) const noexcept;
 
  public:
 	size_t height(link_type x) const;
@@ -482,6 +488,7 @@ AvlTree<K, V, KoV, C, A>::insert_equal(const_reference value) {
 	}
 
 	link_type z = create_node(value);
+
 	return insert_aux(y, z);
 }
 
@@ -498,7 +505,7 @@ inline void AvlTree<K, V, KoV, C, A>::erase(const_iterator position) {
 }
 
 template <typename K, typename V, typename KoV, typename C, typename A>
-inline void AvlTree<K, V, KoV, C, A>::merge(AvlTree &source) {
+inline void AvlTree<K, V, KoV, C, A>::merge_unique(AvlTree &source) {
 	iterator it = source.begin();
 	iterator last = source.end();
 
@@ -513,12 +520,32 @@ inline void AvlTree<K, V, KoV, C, A>::merge(AvlTree &source) {
 				x = key_compare_(key(z), key(x)) ? left(x) : right(x);	
 			}
 			z = source.erase_aux(z);
-			auto t = source.begin();
 			right(z) = nullptr;
 			left(z) = nullptr;
 			balance_factor(z) = 0;
 			insert_aux(y, z);
 		}
+	}
+}
+
+template <typename K, typename V, typename KoV, typename C, typename A>
+inline void AvlTree<K, V, KoV, C, A>::merge_equal(AvlTree &source) {
+	iterator it = source.begin();
+
+	while (it != source.end()) {
+		link_type z = it.node_;
+		++it;
+		link_type y = head_;
+		link_type x = root();
+		while (x != nullptr) {
+			y = x;
+			x = key_compare_(key(z), key(x)) ? left(x) : right(x);	
+		}
+		z = source.erase_aux(z);
+		right(z) = nullptr;
+		left(z) = nullptr;
+		balance_factor(z) = 0;
+		insert_aux(y, z);
 	}
 }
 
@@ -561,13 +588,13 @@ AvlTree<K, V, KoV, C, A>::maximum(link_type node) {
 */
 template <typename K, typename V, typename KoV, typename C, typename A>
 inline typename AvlTree<K, V, KoV, C, A>::iterator
-AvlTree<K, V, KoV, C, A>::find(const key_type& key) {
+AvlTree<K, V, KoV, C, A>::find(const key_type& key) noexcept {
 	return iterator(find_node(key));
 }
 
 template <typename K, typename V, typename KoV, typename C, typename A>
 inline typename AvlTree<K, V, KoV, C, A>::const_iterator
-AvlTree<K, V, KoV, C, A>::find(const key_type& key) const {
+AvlTree<K, V, KoV, C, A>::find(const key_type& key) const noexcept {
 	return const_iterator(find_node(key));
 }
 
@@ -577,10 +604,132 @@ AvlTree<K, V, KoV, C, A>::find(const key_type& key) const {
 
 template <typename K, typename V, typename KoV, typename C, typename A>
 inline bool
-AvlTree<K, V, KoV, C, A>::contains(const key_type& key) const {
+AvlTree<K, V, KoV, C, A>::contains(const key_type& key) const noexcept {
 	return find_node(key) != head_;
 }
 
+/*
+*  LOWER BOUND
+*  Iterator pointing to the first element that is not less than key.
+*  If no such element is found, a past-the-end iterator end() is returned.
+*/
+
+template <typename K, typename V, typename KoV, typename C, typename A>
+inline typename AvlTree<K, V, KoV, C, A>::iterator
+AvlTree<K, V, KoV, C, A>::lower_bound(const key_type& lower_key) noexcept {
+	link_type y = head_;  // last node which is not less than key
+	link_type x = root();
+
+	while (x != nullptr) {
+		if (!key_compare_(key(x), lower_key)) {  // key(x) >= lower_key
+			y = x;
+			x = left(x);
+		} else {
+			x = right(x);
+		}
+	}
+
+	return iterator(y);
+}
+
+template <typename K, typename V, typename KoV, typename C, typename A>
+inline typename AvlTree<K, V, KoV, C, A>::const_iterator
+AvlTree<K, V, KoV, C, A>::lower_bound(const key_type& lower_key) const noexcept {
+	link_type y = head_;  // last node which is not less than key
+	link_type x = root();
+
+	while (x != nullptr) {
+		if (!key_compare_(key(x), lower_key)) {  // key(x) >= lower_key
+			y = x;
+			x = left(x);
+		} else {
+			x = right(x);
+		}
+	}
+
+	return const_iterator(y);
+}
+
+/*
+*  UPPER BOUND
+*  Iterator pointing to the first element that is greater than key.
+*  If no such element is found, past-the-end end() iterator is returned
+*/
+template <typename K, typename V, typename KoV, typename C, typename A>
+inline typename AvlTree<K, V, KoV, C, A>::iterator
+AvlTree<K, V, KoV, C, A>::upper_bound(const key_type& upper_key) noexcept {
+	link_type y = head_;  // last node which is greater than key
+	link_type x = root();
+
+	while (x != nullptr) {
+		if (key_compare_(upper_key, key(x))) {  // upper_key < key(x);
+			y = x;
+			x = left(x);
+		} else {
+			x = right(x);
+		}
+	}
+
+	return iterator(y);
+}
+
+template <typename K, typename V, typename KoV, typename C, typename A>
+inline typename AvlTree<K, V, KoV, C, A>::const_iterator
+AvlTree<K, V, KoV, C, A>::upper_bound(const key_type& upper_key) const noexcept {
+	link_type y = head_;  // last node which is greater than key
+	link_type x = root();
+
+	while (x != nullptr) {
+		if (key_compare_(upper_key, key(x))) {  // upper_key < key(x);
+			y = x;
+			x = left(x);
+		} else {
+			x = right(x);
+		}
+	}
+
+	return const_iterator(y);
+}
+
+/*
+*  EQUAL RANGE
+*  Returns a range containing all elements with the given key in the container.
+*  The range is defined by two iterators, one pointing to the first element that
+*  is not less than key and another pointing to the first element greater than key. 
+*/
+template <typename K, typename V, typename KoV, typename C, typename A>
+inline std::pair<typename AvlTree<K, V, KoV, C, A>::iterator,
+                 typename AvlTree<K, V, KoV, C, A>::iterator>
+AvlTree<K, V, KoV, C, A>::equal_range(const key_type& bound_key) noexcept {
+	return std::make_pair(lower_bound(bound_key), upper_bound(bound_key));
+}
+
+template <typename K, typename V, typename KoV, typename C, typename A>
+inline std::pair<typename AvlTree<K, V, KoV, C, A>::const_iterator,
+                 typename AvlTree<K, V, KoV, C, A>::const_iterator>
+AvlTree<K, V, KoV, C, A>::equal_range(const key_type& bound_key) const noexcept {
+	return std::make_pair(lower_bound(bound_key), upper_bound(bound_key));
+}
+
+/*
+*  COUNT
+*  Returns the number of elements with key that compares equivalent
+*  to the specified argument.
+*/
+template <typename K, typename V, typename KoV, typename C, typename A>
+inline typename AvlTree<K, V, KoV, C, A>::size_type
+AvlTree<K, V, KoV, C, A>::count(const key_type& looking_key) const noexcept {
+	const_iterator it = lower_bound(looking_key);
+	const_iterator last = upper_bound(looking_key);
+	size_type n = 0;
+
+	while (it != last) {
+		n += 1;
+		++it;
+	}
+
+	return n;
+}
 
 
 // Auxiliary methods for allocating and clearing memory
@@ -867,8 +1016,6 @@ AvlTree<K, V, KoV, C, A>::erase_aux(link_type z) {
 template <typename K, typename V, typename KoV, typename C, typename A>
 inline typename AvlTree<K, V, KoV, C, A>::link_type
 AvlTree<K, V, KoV, C, A>::rotate_left(link_type x) {
-	assert(x != nullptr);
-	assert(x->right != nullptr);
 	link_type z = x->right;
 
 	x->right = z->left;
@@ -903,8 +1050,6 @@ AvlTree<K, V, KoV, C, A>::rotate_left(link_type x) {
 template <typename K, typename V, typename KoV, typename C, typename A>
 inline typename AvlTree<K, V, KoV, C, A>::link_type
 AvlTree<K, V, KoV, C, A>::rotate_right(link_type x) {
-	assert(x != nullptr);
-	assert(x->left != nullptr);
 	link_type z = x->left;
 
 	x->left = z->right;
@@ -939,9 +1084,6 @@ AvlTree<K, V, KoV, C, A>::rotate_right(link_type x) {
 template <typename K, typename V, typename KoV, typename C, typename A>
 inline typename AvlTree<K, V, KoV, C, A>::link_type
 AvlTree<K, V, KoV, C, A>::rotate_right_left(link_type x) {
-	assert(x != nullptr);
-	assert(x->right != nullptr);
-	assert(x->right->left != nullptr);
 	link_type z = x->right;
 	link_type y = z->left;
 
@@ -988,9 +1130,6 @@ AvlTree<K, V, KoV, C, A>::rotate_right_left(link_type x) {
 template <typename K, typename V, typename KoV, typename C, typename A>
 inline typename AvlTree<K, V, KoV, C, A>::link_type
 AvlTree<K, V, KoV, C, A>::rotate_left_right(link_type x) {
-	assert(x != nullptr);
-	assert(x->left != nullptr);
-	assert(x->left->right != nullptr);
 	link_type z = x->left;
 	link_type y = z->right;
 
@@ -1189,231 +1328,7 @@ int AvlTree<K, V, KoV, C, A>::verify(void) const {
 
 	return 0;
 }
-
-
-
-/*
-template <typename K, typename V, typename KoV, typename C, typename A>
-void AvlTree<K, V, KoV, C, A>::erase_rebalance(link_type n, int left_side) {
-	link_type x = nullptr;
-	link_type z = nullptr;
-	link_type g = nullptr;
-	int bf = 0;
-
-	//std::cout << "start prebalance\n";
-	//std::cout << "start prebalance key = " << key(n) << '\n';
-	//std::cout << "start prebalance bf = " << balance_factor(n) << '\n';
-	//std::cout << "start side = " << (left_side ? "left\n" : "right\n");
-	if (left_side) {
-		if (balance_factor(n) < 0) {
-			balance_factor(n) = 0;
-		} else if (balance_factor(n) == 0) {
-			balance_factor(n) = +1;
-			return;
-		} else {
-			link_type z = right(n);              // Sibling of N (higher by 2);
-			assert(z != nullptr);
-			int bf = balance_factor(z);
-			if (bf < 0) {                        // Right-Left case;
-				n = rotate_right_left(n);
-			} else {                             // Right-Right case;
-				n = rotate_left(n);
-			}
-			if (bf == 0) return;
-		}
-	} else {
-		if (balance_factor(n) > 0) {
-			balance_factor(n) = 0;
-		} else if (balance_factor(n) == 0) {
-			balance_factor(n) = -1;
-			return;
-		} else {
-			link_type z = left(n);                         // sibling of n (higher by 2);
-			assert(z != nullptr);
-			bf = balance_factor(z);
-			if (bf > 0) {                        // Left-Right case;
-				n = rotate_left_right(n);
-			} else {                             // Left-Left case;
-				n = rotate_right(n);
-			}
-			if (bf == 0) return;
-		}
-	}
-	//std::cout << "end prebalance\n";
-
-	//std::cout << "start balance key = " << key(n) << '\n';
-	//std::cout << "start balance bf = " << balance_factor(n) << '\n';
-	for (x = parent(n); x != head_; x = g) {
-		g = parent(x);                           // Save parent of x around rotations
-		if (n == left(x)) {                      // the left subtree decreases;
-			//std::cout << "left_case start\n";
-			assert(x != nullptr);
-			assert(n != nullptr);
-			if (balance_factor(x) > 0) {					 // x is right-heavy;
-			                                       // The temorary bf of x == +2;
-                                             // rebalancing is required;
-				link_type z = right(x);              // Sibling of N (higher by 2);
-				assert(z != nullptr);
-				int bf = balance_factor(z);
-				if (bf < 0) {                        // Right-Left case;
-					n = rotate_right_left(x);
-				} else {                             // Right-Right case;
-					n = rotate_left(x);
-				}
-				if (bf == 0) break;
-				//std::cout << "left_case end\n";
-			} else if (balance_factor(x) == 0) {   // n's height decrease is absorbed at x;
-					balance_factor(x) = 1;
-					// std::cout << "left_case end\n";
-					break;
-			} else {                               // balance_factor(x) < 0;
-				n = x;
-				balance_factor(n) = 0;               // Height of n decreases by 1;
-				//std::cout << "left_case end\n";
-				continue;
-			}
-		} else {                                 // the right subtree decreases;
-			//std::cout << "right_case start\n";
-			assert(x != nullptr);
-			assert(n != nullptr);
-			if (balance_factor(x) < 0) {           // x is left-heavy;
-                                             // the temporary bf of x == -2;
-																						 // rebalancing is required;
-				z = left(x);                         // sibling of n (higher by 2);
-				assert(z != nullptr);
-				bf = balance_factor(z);
-				if (bf > 0) {                        // Left-Right case;
-					n = rotate_left_right(x);
-				} else {                             // Left-Left case;
-					n = rotate_right(x);
-				}
-				if (bf == 0) break;
-				//std::cout << "right_case end\n";
-			} else if (balance_factor(x) == 0) {   // n's height decrease by 1;
-					balance_factor(x) = -1;
-					//std::cout << "right_case end\n";
-					break;
-			} else {                               // balance_factor(x) > 0;
-				n = x;
-				balance_factor(n) = 0;               // height of n decreases by 1;
-				//std::cout << "right_case end\n";
-				continue;
-			}
-		}
-
-		//if (bf == 0) {                           // height does not changed
-		//	break;
-		//}
-	}
-}
-
-template <typename K, typename V, typename KoV, typename C, typename A>
-void AvlTree<K, V, KoV, C, A>::erase_aux(link_type z) {
-	link_type y = z;
-	link_type x = nullptr;
-	link_type rotated_node = nullptr;
-
-	//enum {left, right} side;
-
-	if (y->right == nullptr) {
-			rotated_node = y->parent;
-			x = y->left;
-			if (x != nullptr) {
-				x->parent = y->parent;
-			}
-			if (root() == z) {
-				root() = x;
-			} else if (z == z->parent->left) {
-				z->parent->left = x;
-				if (balance_factor(rotated_node) < 0) {
-					balance_factor(rotated_node) = 0;
-				} else if (balance_factor(rotated_node) == 0) {
-					balance_factor(rotated_node) = +1;
-				} else {
-					//std::cout << "abort1\n";
-					//abort();
-					link_type tmp = rotated_node->right;
-					assert(rotated_node->right != nullptr);
-					if (balance_factor(tmp) < 0) {
-						rotated_node = rotate_right_left(rotated_node);
-					} else if (balance_factor(tmp) > 0) {
-						rotated_node = rotate_left(rotated_node);
-					} else {
-						rotated_node = rotate_left(rotated_node)
-					}
-				}
-			} else {
-				z->parent->right = x;
-				if (balance_factor(rotated_node) > 0) {
-					balance_factor(rotated_node) = 0;
-				} else if (balance_factor(rotated_node) == 0) {
-					balance_factor(rotated_node) = -1;
-				} else {
-					//std::cout << "abort2\n";
-					//abort();
-					link_type tmp = rotated_node->left;
-					assert(rotated_node->left != nullptr);
-					if (balance_factor(tmp) > 0) {
-						rotated_node = rotate_left_right(rotated_node);
-					} else if (balance_factor(tmp) < 0) {
-						rotated_node = rotate_right(rotated_node);
-					} else {
-						rotated_node = rotate_right(rotated_node);
-					}
-				}
-		}
-	} else {
-		y = y->right;
-		while (y->left != nullptr) {
-			y = y->left;
-		}
-		x = y->right;
-		
-		if (z->left != nullptr) {
-			z->left->parent = y;             // z has two non-null child
-		}
-		y->left = z->left;			   			 // we link z's left child to y's left child
-		if (y == z->right) {
-			rotated_node = y;
-		} else {                         // y is not z's right child
-			rotated_node = y->parent;
-			if (x != nullptr) {
-				x->parent = y->parent;
-			}
-			y->parent->left = x;           // there y must be a left child
-			y->right = z->right;
-			z->right->parent = y;
-		}
-		if (root() == z) {
-			root() = y;
-		} else if (z->parent->left == z) {
-			z->parent->left = y;
-		} else {
-			z->parent->right = y;
-		}
-		y->parent = z->parent;
-		y->balance_factor = z->balance_factor;
-	}
-
-	if (rotated_node != head_)
-		erase_rebalance(rotated_node);
-
-	if (root() != nullptr) {
-		leftmost() = minimum(root());
-		rightmost() = maximum(root());
-	} else {
-		leftmost() = head_;
-		rightmost() = head_;
-	}
-
-	destroy_node(z);
-}
 	
-*/
-
-
-
-
 } // namespace s21
 
 #endif // S21_AVL_TREE_H_
