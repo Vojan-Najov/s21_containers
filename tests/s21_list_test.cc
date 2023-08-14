@@ -23,7 +23,7 @@ class ListTest : public ::testing::Test {
     ss.push_back(v2);
   }
   template <typename T>
-  void EqualList(s21::list<T> &lhs, std::list<T> &rhs) {
+  void EqualList(const s21::list<T> &lhs, const std::list<T> &rhs) {
     EXPECT_EQ(lhs.size(), rhs.size());
 
     auto lhs_it = lhs.begin();
@@ -661,7 +661,7 @@ TEST_F(ListTest, Sort) {
   {
     s21::list<int> l;
     std::list<int> s;
-    for (size_t i = 0; i < 10000; ++i) {
+    for (size_t i = 0; i < 100000; ++i) {
       int value = std::rand();
       l.push_front(value);
       s.push_front(value);
@@ -705,4 +705,82 @@ TEST_F(ListTest, Sort) {
     s.sort();
     EqualList(l, s);
   }
+}
+
+TEST_F(ListTest, InsertMany) {
+	s21::list<int> l = {1, 2, 3, 4, 5};
+	auto it = l.cbegin();
+	++it; ++it;
+	l.insert_many(it, 100, 101, 102);
+
+	{
+		std::list<int> tmp = {1, 2, 100, 101, 102, 3, 4, 5};
+		EqualList(l, tmp);
+	}
+
+	l.insert_many(l.begin(), -4, -3, -2, -1);
+	{
+		std::list<int> tmp = {-4, -3, -2, -1, 1, 2, 100, 101, 102, 3, 4, 5};
+		EqualList(l, tmp);
+	}
+
+	l.insert_many(l.end(), 90, 91);
+	{
+		std::list<int> tmp = {-4, -3, -2, -1, 1, 2, 100, 101, 102, 3, 4, 5, 90, 91};
+		EqualList(l, tmp);
+	}
+
+	l.insert_many(++l.begin());
+	{
+		std::list<int> tmp = {-4, -3, -2, -1, 1, 2, 100, 101, 102, 3, 4, 5, 90, 91};
+		EqualList(l, tmp);
+	}
+}
+
+TEST_F(ListTest, InsertManyBack) {
+	{
+		s21::list<int> l = {1, 2, 3};
+
+		l.insert_many_back(4, 5, 6, 7);
+		l.insert_many_back(8, 9 , 10);
+		l.insert_many_back(11, 12);
+		l.insert_many_back(13);
+		l.insert_many_back();
+
+		std::list<int> tmp = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+		EqualList(l, tmp);
+	}
+	{
+		s21::list<int> l;
+		l.insert_many_back();
+		
+		l.insert_many_back(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
+		
+		std::list<int> tmp = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+		EqualList(l, tmp);
+	}
+}
+
+TEST_F(ListTest, InsertManyFront) {
+	{
+		s21::list<int> l = {11, 12, 13};
+	
+		l.insert_many_front(7, 8, 9 , 10);
+		l.insert_many_front(4, 5, 6);
+		l.insert_many_front(2, 3);
+		l.insert_many_front(1);
+		l.insert_many_front();
+
+		std::list<int> tmp = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+		EqualList(l, tmp);
+	}
+	{
+		s21::list<int> l;
+		l.insert_many_front();
+		
+		l.insert_many_front(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
+		
+		std::list<int> tmp = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+		EqualList(l, tmp);
+	}
 }
