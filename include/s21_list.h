@@ -4,7 +4,6 @@
 #define INCLUDE_S21_LIST_H_
 
 #include <cstddef>
-#include <exception>
 #include <initializer_list>
 #include <iterator>
 #include <limits>
