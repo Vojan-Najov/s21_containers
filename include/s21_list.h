@@ -7,6 +7,7 @@
 #include <exception>
 #include <initializer_list>
 #include <iterator>
+#include <limits>
 
 namespace s21 {
 
@@ -25,7 +26,6 @@ class ListConstIterator;
 template <typename T>
 class list;
 
-
 // LIST NODE
 
 template <typename T>
@@ -34,7 +34,6 @@ struct ListNode final {
   ListNode *next;
   T value;
 };
-
 
 // LIST_ITERATOR_BASE, LIST_ITERATOR, LIST_CONST_ITERATOR
 
@@ -70,12 +69,11 @@ inline bool operator!=(const ListIteratorBase<T> &lhs,
   return !(lhs == rhs);
 }
 
-
 template <typename T>
 class ListIterator final : public ListIteratorBase<T> {
  public:
   friend list<T>;
-	friend ListConstIterator<T>;
+  friend ListConstIterator<T>;
 
   using difference_type = std::ptrdiff_t;
   using iterator_category = std::bidirectional_iterator_tag;
@@ -83,7 +81,23 @@ class ListIterator final : public ListIteratorBase<T> {
   using pointer = T *;
   using reference = T &;
 
+  ListIterator(void) : ListIteratorBase<T>(nullptr) {}
+
   explicit ListIterator(ListNode<T> *node) : ListIteratorBase<T>(node) {}
+
+  ListIterator(const ListIterator &other) : ListIteratorBase<T>(other.node_) {}
+
+  ListIterator(ListIterator &&other) : ListIteratorBase<T>(other.node_) {}
+
+  ListIterator &operator=(const ListIterator &other) {
+    ListIteratorBase<T>::node_ = other.node_;
+    return *this;
+  }
+
+  ListIterator &operator=(ListIterator &&other) {
+    ListIteratorBase<T>::node_ = other.node_;
+    return *this;
+  }
 
   ListIterator &operator++(void) {
     ListIteratorBase<T>::increment();
@@ -112,7 +126,6 @@ class ListIterator final : public ListIteratorBase<T> {
   T *operator->(void) { return &ListIteratorBase<T>::node_->value; }
 };
 
-
 template <typename T>
 class ListConstIterator final : public ListIteratorBase<T> {
  public:
@@ -124,10 +137,28 @@ class ListConstIterator final : public ListIteratorBase<T> {
   using pointer = T *;
   using reference = T &;
 
+  ListConstIterator(void) : ListIteratorBase<T>(nullptr) {}
+
   explicit ListConstIterator(ListNode<T> *node) : ListIteratorBase<T>(node) {}
 
-	ListConstIterator(const ListIterator<T> &other)
-		: ListIteratorBase<T>(other.node_) {}
+  ListConstIterator(const ListIterator<T> &other)
+      : ListIteratorBase<T>(other.node_) {}
+
+  ListConstIterator(const ListConstIterator &other)
+      : ListIteratorBase<T>(other.node_) {}
+
+  ListConstIterator(ListConstIterator &&other)
+      : ListIteratorBase<T>(other.node_) {}
+
+  ListConstIterator &operator=(const ListConstIterator &other) {
+    ListIteratorBase<T>::node_ = other.node_;
+    return *this;
+  }
+
+  ListConstIterator &operator=(ListConstIterator &&other) {
+    ListIteratorBase<T>::node_ = other.node_;
+    return *this;
+  }
 
   ListConstIterator &operator++(void) {
     ListIteratorBase<T>::increment();
@@ -155,7 +186,6 @@ class ListConstIterator final : public ListIteratorBase<T> {
 
   const T *operator->(void) { return &ListIteratorBase<T>::node_->value; }
 };
-
 
 // LIST
 
@@ -214,12 +244,12 @@ class list final {
   void sort(void);
 
  public:
-	template <typename... Args>
-	iterator insert_many(const_iterator pos, Args&&... args);
-	template <typename... Args>
-	void insert_many_back(Args&&... args);
-	template <typename... Args>
-	void insert_many_front(Args&&... args);
+  template <typename... Args>
+  iterator insert_many(const_iterator pos, Args &&...args);
+  template <typename... Args>
+  void insert_many_back(Args &&...args);
+  template <typename... Args>
+  void insert_many_front(Args &&...args);
 
  private:
   ListNode<T> *CreateNode(ListNode<T> *prev, ListNode<T> *next,
@@ -231,12 +261,10 @@ class list final {
   ListNode<T> *head_;
 };
 
-
 // list: auxiliary private member functions.
 
 template <typename T>
-ListNode<T> *list<T>::CreateNode(ListNode<T> *prev,
-																 ListNode<T> *next,
+ListNode<T> *list<T>::CreateNode(ListNode<T> *prev, ListNode<T> *next,
                                  const T &value) {
   ListNode<T> *node =
       static_cast<ListNode<T> *>(operator new(sizeof(ListNode<T>)));
@@ -270,7 +298,6 @@ void list<T>::Transfer(iterator position, iterator first, iterator last) {
     first.node_->prev = tmp;
   }
 }
-
 
 // list: ctors, dtor, overloading operator=.
 
@@ -333,7 +360,6 @@ list<T>::~list(void) {
   operator delete(head_);
 }
 
-
 // list: element access
 
 template <typename T>
@@ -355,7 +381,6 @@ template <typename T>
 inline const T &list<T>::back(void) const {
   return head_->prev->value;
 }
-
 
 // list: iterators
 
@@ -389,7 +414,6 @@ inline ListConstIterator<T> list<T>::cend(void) const noexcept {
   return const_iterator{head_};
 }
 
-
 // list: capacity
 
 template <typename T>
@@ -408,9 +432,12 @@ inline size_t list<T>::size(void) const noexcept {
 
 template <typename T>
 inline size_t list<T>::max_size(void) const noexcept {
-  return size_t(-1) / 2 / sizeof(ListNode<T>);
+#ifdef __linux__
+  return std::numeric_limits<size_type>::max() / 2 / sizeof(ListNode<T>);
+#else   // __linux__
+  return std::numeric_limits<size_type>::max() / sizeof(ListNode<T>);
+#endif  // __linux__
 }
-
 
 // list: modifiers
 
@@ -548,25 +575,25 @@ inline void list<T>::sort(void) {
 
 template <typename T>
 template <typename... Args>
-inline typename list<T>::iterator
-list<T>::insert_many(const_iterator pos, Args&&... args) {
-	list tmp{args...};
-	if (!tmp.empty()) {
-		Transfer(iterator(pos.node_), tmp.begin(), tmp.end());
-	}
-	return iterator(pos.node_);
+inline typename list<T>::iterator list<T>::insert_many(const_iterator pos,
+                                                       Args &&...args) {
+  list tmp{args...};
+  if (!tmp.empty()) {
+    Transfer(iterator(pos.node_), tmp.begin(), tmp.end());
+  }
+  return iterator(pos.node_);
 }
 
 template <typename T>
 template <typename... Args>
-inline void list<T>::insert_many_back(Args&&... args) {
-	insert_many(cend(), args...);
+inline void list<T>::insert_many_back(Args &&...args) {
+  insert_many(cend(), args...);
 }
 
 template <typename T>
 template <typename... Args>
-inline void list<T>::insert_many_front(Args&&... args) {
-	insert_many(cbegin(), args...);
+inline void list<T>::insert_many_front(Args &&...args) {
+  insert_many(cbegin(), args...);
 }
 
 }  // namespace s21

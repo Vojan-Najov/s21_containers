@@ -54,6 +54,32 @@ TEST_F(ListTest, DefaultCtor) {
   const s21::list<int> cl;
   EXPECT_TRUE(cl.empty());
   EXPECT_EQ(cl.size(), 0);
+
+  {
+    s21::list<int>::value_type tmp;
+    (void)tmp;
+  }
+  {
+    int a = 1;
+    s21::list<int>::reference tmp = a;
+    (void)tmp;
+  }
+  {
+    s21::list<int>::const_reference tmp = 1;
+    (void)tmp;
+  }
+  {
+    s21::list<int>::iterator tmp;
+    (void)tmp;
+  }
+  {
+    s21::list<int>::const_iterator tmp;
+    (void)tmp;
+  }
+  {
+    s21::list<int>::size_type tmp = 0;
+    (void)tmp;
+  }
 }
 
 TEST_F(ListTest, CastCtor) {
@@ -708,79 +734,80 @@ TEST_F(ListTest, Sort) {
 }
 
 TEST_F(ListTest, InsertMany) {
-	s21::list<int> l = {1, 2, 3, 4, 5};
-	auto it = l.cbegin();
-	++it; ++it;
-	l.insert_many(it, 100, 101, 102);
+  s21::list<int> l = {1, 2, 3, 4, 5};
+  auto it = l.cbegin();
+  ++it;
+  ++it;
+  l.insert_many(it, 100, 101, 102);
 
-	{
-		std::list<int> tmp = {1, 2, 100, 101, 102, 3, 4, 5};
-		EqualList(l, tmp);
-	}
+  {
+    std::list<int> tmp = {1, 2, 100, 101, 102, 3, 4, 5};
+    EqualList(l, tmp);
+  }
 
-	l.insert_many(l.begin(), -4, -3, -2, -1);
-	{
-		std::list<int> tmp = {-4, -3, -2, -1, 1, 2, 100, 101, 102, 3, 4, 5};
-		EqualList(l, tmp);
-	}
+  l.insert_many(l.begin(), -4, -3, -2, -1);
+  {
+    std::list<int> tmp = {-4, -3, -2, -1, 1, 2, 100, 101, 102, 3, 4, 5};
+    EqualList(l, tmp);
+  }
 
-	l.insert_many(l.end(), 90, 91);
-	{
-		std::list<int> tmp = {-4, -3, -2, -1, 1, 2, 100, 101, 102, 3, 4, 5, 90, 91};
-		EqualList(l, tmp);
-	}
+  l.insert_many(l.end(), 90, 91);
+  {
+    std::list<int> tmp = {-4, -3, -2, -1, 1, 2, 100, 101, 102, 3, 4, 5, 90, 91};
+    EqualList(l, tmp);
+  }
 
-	l.insert_many(++l.begin());
-	{
-		std::list<int> tmp = {-4, -3, -2, -1, 1, 2, 100, 101, 102, 3, 4, 5, 90, 91};
-		EqualList(l, tmp);
-	}
+  l.insert_many(++l.begin());
+  {
+    std::list<int> tmp = {-4, -3, -2, -1, 1, 2, 100, 101, 102, 3, 4, 5, 90, 91};
+    EqualList(l, tmp);
+  }
 }
 
 TEST_F(ListTest, InsertManyBack) {
-	{
-		s21::list<int> l = {1, 2, 3};
+  {
+    s21::list<int> l = {1, 2, 3};
 
-		l.insert_many_back(4, 5, 6, 7);
-		l.insert_many_back(8, 9 , 10);
-		l.insert_many_back(11, 12);
-		l.insert_many_back(13);
-		l.insert_many_back();
+    l.insert_many_back(4, 5, 6, 7);
+    l.insert_many_back(8, 9, 10);
+    l.insert_many_back(11, 12);
+    l.insert_many_back(13);
+    l.insert_many_back();
 
-		std::list<int> tmp = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
-		EqualList(l, tmp);
-	}
-	{
-		s21::list<int> l;
-		l.insert_many_back();
-		
-		l.insert_many_back(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
-		
-		std::list<int> tmp = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
-		EqualList(l, tmp);
-	}
+    std::list<int> tmp = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+    EqualList(l, tmp);
+  }
+  {
+    s21::list<int> l;
+    l.insert_many_back();
+
+    l.insert_many_back(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
+
+    std::list<int> tmp = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+    EqualList(l, tmp);
+  }
 }
 
 TEST_F(ListTest, InsertManyFront) {
-	{
-		s21::list<int> l = {11, 12, 13};
-	
-		l.insert_many_front(7, 8, 9 , 10);
-		l.insert_many_front(4, 5, 6);
-		l.insert_many_front(2, 3);
-		l.insert_many_front(1);
-		l.insert_many_front();
+  {
+    s21::list<int> l = {11, 12, 13};
 
-		std::list<int> tmp = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
-		EqualList(l, tmp);
-	}
-	{
-		s21::list<int> l;
-		l.insert_many_front();
-		
-		l.insert_many_front(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
-		
-		std::list<int> tmp = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
-		EqualList(l, tmp);
-	}
+    l.insert_many_front(7, 8, 9, 10);
+    l.insert_many_front(4, 5, 6);
+    l.insert_many_front(2, 3);
+    l.insert_many_front(1);
+    l.insert_many_front();
+
+    std::list<int> tmp = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+    EqualList(l, tmp);
+  }
+  {
+    s21::list<int> l;
+    l.insert_many_front();
+
+    l.insert_many_front(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
+
+    std::list<int> tmp = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+    EqualList(l, tmp);
+  }
 }
