@@ -63,7 +63,7 @@ class array final {
 // Constructors, destructor and overloading operator=.
 
 template <typename T, size_t N>
-array<T, N>::array(void) : elements_() {}
+array<T, N>::array(void) {}
 
 template <typename T, size_t N>
 array<T, N>::array(std::initializer_list<T> const& items) : elements_() {
