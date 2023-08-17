@@ -226,3 +226,54 @@ TEST_F(StackTest, TopPopPushVector) {
   // top() and pop() are called in StacksEqual()
   StacksEqual(st, std_st);
 }
+
+TEST_F(StackTest, InsertManyFront) {
+  {
+    s21::stack<double> st = {0.0, 0.5};
+    st.insert_many_front(1, 2, 3.1, 4, 5.1234);
+
+    std::stack<double> std_st;
+    std_st.push(0.0);
+    std_st.push(0.5);
+    std_st.push(1.0);
+    std_st.push(2.0);
+    std_st.push(3.1);
+    std_st.push(4.0);
+    std_st.push(5.1234);
+
+    StacksEqual(st, std_st);
+  }
+  {
+    s21::stack<double> st = {0.0, 0.5};
+    st.insert_many_front(1, 2.123);
+
+    std::stack<double> std_st;
+    std_st.push(0.0);
+    std_st.push(0.5);
+    std_st.push(1.0);
+    std_st.push(2.123);
+
+    StacksEqual(st, std_st);
+  }
+  {
+    s21::stack<double> st = {0.0, 0.5};
+    st.insert_many_front(1);
+
+    std::stack<double> std_st;
+    std_st.push(0.0);
+    std_st.push(0.5);
+    std_st.push(1.0);
+
+    StacksEqual(st, std_st);
+  }
+  {
+    s21::stack<double> st = {0.0, 0.5};
+    st.insert_many_front();
+
+    std::stack<double> std_st;
+    std_st.push(0.0);
+    std_st.push(0.5);
+
+    StacksEqual(st, std_st);
+  }
+}

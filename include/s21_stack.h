@@ -4,7 +4,6 @@
 #define INCLUDE_S21_STACK_H_
 
 #include <cstddef>
-#include <exception>
 #include <initializer_list>
 #include <utility>
 
@@ -70,6 +69,7 @@ class stack final {
 
  public:
   bool empty(void) const noexcept { return head_ == nullptr; }
+
   size_type size(void) const noexcept {
     size_type sz = 0;
     StackNode *tmp = head_;
@@ -85,12 +85,34 @@ class stack final {
     StackNode *node = new StackNode{head_, value};
     head_ = node;
   }
+
   void pop(void) {
     StackNode *node = head_;
     head_ = head_->next;
     delete node;
   }
+
   void swap(stack &other) noexcept { std::swap(head_, other.head_); }
+
+ public:
+  template <typename... Args>
+  void insert_many_front(Args &&...args) {
+    insert_many_front_aux(args...);
+  }
+
+ private:
+  void insert_many_front_aux(void) {}
+
+  template <typename U>
+  void insert_many_front_aux(U &&arg) {
+    push(arg);
+  }
+
+  template <typename U, typename... Args>
+  void insert_many_front_aux(U &&arg, Args &&...args) {
+    push(arg);
+    insert_many_front_aux(args...);
+  }
 
  private:
   struct StackNode final {
