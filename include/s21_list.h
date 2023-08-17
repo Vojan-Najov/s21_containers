@@ -122,7 +122,11 @@ class ListIterator final : public ListIteratorBase<T> {
 
   T &operator*(void) { return ListIteratorBase<T>::node_->value; }
 
+  const T &operator*(void) const { return ListIteratorBase<T>::node_->value; }
+
   T *operator->(void) { return &ListIteratorBase<T>::node_->value; }
+
+  const T *operator->(void) const { return &ListIteratorBase<T>::node_->value; }
 };
 
 template <typename T>
@@ -181,9 +185,9 @@ class ListConstIterator final : public ListIteratorBase<T> {
     return tmp;
   }
 
-  const T &operator*(void) { return ListIteratorBase<T>::node_->value; }
+  const T &operator*(void) const { return ListIteratorBase<T>::node_->value; }
 
-  const T *operator->(void) { return &ListIteratorBase<T>::node_->value; }
+  const T *operator->(void) const { return &ListIteratorBase<T>::node_->value; }
 };
 
 // LIST
@@ -206,7 +210,7 @@ class list final {
   list(list &&other);
   ~list(void);
   list &operator=(const list &other);
-  list &operator=(list &&other);
+  list &operator=(list &&other) noexcept;
 
  public:
   reference front(void);
@@ -235,7 +239,7 @@ class list final {
   void pop_back(void);
   void push_front(const_reference value);
   void pop_front(void);
-  void swap(list &other);
+  void swap(list &other) noexcept;
   void merge(list &other);
   void splice(const_iterator pos, list &other);
   void reverse(void);
@@ -285,6 +289,11 @@ void list<T>::DestroyNode(ListNode<T> *node) {
   operator delete(static_cast<void *>(node));
 }
 
+/*
+ *  Transfer
+ *  Move the sublist from the first to the last not inclusive [first, last)
+ *  and insert before the position iterator
+ */
 template <typename T>
 void list<T>::Transfer(iterator position, iterator first, iterator last) {
   if (position != first && position != last) {
@@ -322,7 +331,7 @@ list<T>::list(const std::initializer_list<T> &items) : list() {
 }
 
 template <typename T>
-list<T>::list(const list<T> &other) : list() {
+list<T>::list(const list &other) : list() {
   const_iterator it = other.cbegin();
   const_iterator last = other.cend();
   while (it != last) {
@@ -337,16 +346,16 @@ list<T>::list(list<T> &&other) : list() {
 }
 
 template <typename T>
-inline list<T> &list<T>::operator=(const list<T> &other) {
+inline list<T> &list<T>::operator=(const list &other) {
   if (this != &other) {
-    list<T> tmp(other);
+    list tmp(other);
     swap(tmp);
   }
   return *this;
 }
 
 template <typename T>
-inline list<T> &list<T>::operator=(list<T> &&other) {
+inline list<T> &list<T>::operator=(list &&other) noexcept {
   if (this != &other) {
     swap(other);
   }
@@ -453,8 +462,8 @@ inline void list<T>::clear(void) {
 }
 
 template <typename T>
-inline typename list<T>::iterator list<T>::insert(
-    typename list<T>::iterator pos, typename list<T>::const_reference value) {
+inline typename list<T>::iterator list<T>::insert(iterator pos,
+                                                  const_reference value) {
   ListNode<T> *node = CreateNode(pos.node_->prev, pos.node_, value);
   pos.node_->prev->next = node;
   pos.node_->prev = node;
@@ -491,7 +500,7 @@ inline void list<T>::pop_front(void) {
 }
 
 template <typename T>
-inline void list<T>::swap(list<T> &other) {
+inline void list<T>::swap(list<T> &other) noexcept {
   std::swap(head_, other.head_);
 }
 
@@ -537,16 +546,16 @@ inline void list<T>::unique(void) {
   while (++next != last) {
     if (*it == *next) {
       erase(next);
+      next = it;
     } else {
       it = next;
     }
-    next = it;
   }
 }
 
 template <typename T>
 inline void list<T>::sort(void) {
-  if (head_ == head_->next || head_->next->next == head_) {
+  if (head_ == head_->next || head_ == head_->next->next) {
     return;
   }
 
