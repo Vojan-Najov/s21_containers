@@ -1,13 +1,13 @@
 // Copyright 2023 <Carmine Cartman, Vojan Najov>
 
-#ifndef S21_AVL_TREE_H_
-#define S21_AVL_TREE_H_
+#ifndef INCLUDE_S21_AVL_TREE_H_
+#define INCLUDE_S21_AVL_TREE_H_
 
 #include <cstddef>
 #include <iterator>
 #include <utility>
 
-#include "s21_utils.h"
+#include "./s21_utils.h"
 
 namespace s21 {
 
@@ -1319,4 +1319,4 @@ int AvlTree<K, V, KoV, C, A>::verify(void) const {
 
 }  // namespace s21
 
-#endif  // S21_AVL_TREE_H_
+#endif  // INCLUDE_S21_AVL_TREE_H_
