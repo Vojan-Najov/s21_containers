@@ -45,7 +45,6 @@ class queue final {
       queue tmp(other);
       swap(tmp);
     }
-
     return *this;
   }
 
@@ -53,7 +52,6 @@ class queue final {
     if (this != &other) {
       swap(other);
     }
-
     return *this;
   }
 
@@ -75,12 +73,15 @@ class queue final {
       ++sz;
       node = node->next;
     }
-
     return sz;
   }
 
  public:
+  reference front(void) { return head_->value; }
+
   const_reference front(void) const { return head_->value; }
+
+  reference back(void) { return tail_->value; }
 
   const_reference back(void) const { return tail_->value; }
 
@@ -108,6 +109,26 @@ class queue final {
   void swap(queue &other) noexcept {
     std::swap(head_, other.head_);
     std::swap(tail_, other.tail_);
+  }
+
+ public:
+  template <typename... Args>
+  void insert_many_back(Args &&...args) {
+    insert_many_back_aux(args...);
+  }
+
+ private:
+  void insert_many_back_aux(void) {}
+
+  template <typename U>
+  void insert_many_back_aux(U &&arg) {
+    push(arg);
+  }
+
+  template <typename U, typename... Args>
+  void insert_many_back_aux(U &&arg, Args &&...args) {
+    push(arg);
+    insert_many_back_aux(args...);
   }
 
  private:

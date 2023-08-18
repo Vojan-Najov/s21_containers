@@ -165,6 +165,13 @@ TEST_F(QueueTest, PushPopFrontBack) {
 
   // Pop, Front and Back are called in QueuesEqual
   QueuesEqual(q, qq);
+
+  q.front() = 19;
+  q.back() = -19;
+  qq.front() = 19;
+  qq.back() = -19;
+
+  QueuesEqual(q, qq);
 }
 
 TEST_F(QueueTest, PushPopFrontBackVector) {
@@ -205,4 +212,54 @@ TEST_F(QueueTest, Swap) {
   // Pop, Front and Back are called in QueuesEqual
   QueuesEqual(q1, qq1);
   QueuesEqual(q2, qq2);
+}
+
+TEST_F(QueueTest, InsertManyBack) {
+  {
+    s21::queue<double> q = {1.0, 2.0};
+    q.insert_many_back(3, 4.4, 5.0f, 6L);
+
+    std::queue<double> std_q;
+    std_q.push(1.0);
+    std_q.push(2.0);
+    std_q.push(3.0);
+    std_q.push(4.4);
+    std_q.push(5.0);
+    std_q.push(6.0);
+
+    QueuesEqual(q, std_q);
+  }
+  {
+    s21::queue<double> q = {1.0, 2.0};
+    q.insert_many_back(3, 4.4);
+
+    std::queue<double> std_q;
+    std_q.push(1.0);
+    std_q.push(2.0);
+    std_q.push(3.0);
+    std_q.push(4.4);
+
+    QueuesEqual(q, std_q);
+  }
+  {
+    s21::queue<double> q = {1.0, 2.0};
+    q.insert_many_back(3);
+
+    std::queue<double> std_q;
+    std_q.push(1.0);
+    std_q.push(2.0);
+    std_q.push(3.0);
+
+    QueuesEqual(q, std_q);
+  }
+  {
+    s21::queue<double> q = {1.0, 2.0};
+    q.insert_many_back();
+
+    std::queue<double> std_q;
+    std_q.push(1.0);
+    std_q.push(2.0);
+
+    QueuesEqual(q, std_q);
+  }
 }
