@@ -14,19 +14,19 @@ template <typename T, size_t N>
 class array final {
  public:
   typedef T value_type;
-  typedef value_type& reference;
-  typedef const value_type& const_reference;
-  typedef value_type* iterator;
-  typedef const value_type* const_iterator;
+  typedef value_type &reference;
+  typedef const value_type &const_reference;
+  typedef value_type *iterator;
+  typedef const value_type *const_iterator;
   typedef size_t size_type;
 
  public:
   array(void);
-  array(const std::initializer_list<value_type>& items);
-  array(const array& other);
-  array(array&& other);
-  array& operator=(const array& a);
-  array& operator=(array&& other);
+  array(const std::initializer_list<value_type> &items);
+  array(const array &other);
+  array(array &&other);
+  array &operator=(const array &a);
+  array &operator=(array &&other);
   ~array(void);
 
  public:
@@ -53,7 +53,7 @@ class array final {
   size_type max_size(void) const noexcept;
 
  public:
-  void swap(array& other) noexcept;
+  void swap(array &other) noexcept;
   void fill(const_reference value);
 
  private:
@@ -66,7 +66,7 @@ template <typename T, size_t N>
 array<T, N>::array(void) {}
 
 template <typename T, size_t N>
-array<T, N>::array(std::initializer_list<T> const& items) : elements_() {
+array<T, N>::array(std::initializer_list<T> const &items) : elements_() {
   if (items.size() > N) {
     throw std::out_of_range("array::initilized_constructor out of range");
   }
@@ -78,23 +78,23 @@ array<T, N>::array(std::initializer_list<T> const& items) : elements_() {
 }
 
 template <typename T, size_t N>
-array<T, N>::array(const array<T, N>& other) {
+array<T, N>::array(const array<T, N> &other) {
   std::copy_n(other.elements_, N, elements_);
 }
 
 template <typename T, size_t N>
-array<T, N>::array(array<T, N>&& other) : elements_() {
+array<T, N>::array(array<T, N> &&other) : elements_() {
   std::swap(elements_, other.elements_);
 }
 
 template <typename T, size_t N>
-array<T, N>& array<T, N>::operator=(const array<T, N>& other) {
+array<T, N> &array<T, N>::operator=(const array<T, N> &other) {
   std::copy_n(other.elements_, N, elements_);
   return *this;
 }
 
 template <typename T, size_t N>
-array<T, N>& array<T, N>::operator=(array<T, N>&& other) {
+array<T, N> &array<T, N>::operator=(array<T, N> &&other) {
   std::swap(elements_, other.elements_);
   return *this;
 }
@@ -214,7 +214,7 @@ inline bool array<T, N>::empty(void) const noexcept {
 // Array modifiers
 
 template <typename T, size_t N>
-void array<T, N>::swap(array<T, N>& other) noexcept {
+void array<T, N>::swap(array<T, N> &other) noexcept {
   std::swap_ranges(other.elements_, other.elements_ + N, elements_);
 }
 
