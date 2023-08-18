@@ -13,6 +13,11 @@ Implementation of the s21_containers.h. library. List of classes: list, map, que
 - [stack](./include/s21_stack.h)
 - [queue](./include/s21_queue.h)
 - [array](./include/s21_array.h)
+- [map](./include/s21_map.h)
+- [set](./include/s21_set.h)
+- [avl_tree](./include/s21_avl_tree.h)
+
+'$>make test' for run unit test using `Google Test Framework`.
 
 ## Materials.
 
