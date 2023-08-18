@@ -1,7 +1,7 @@
 // Copyright 2023 <Carmine Cartman, Vojan Najov>
 
-#ifndef INCLUDE_S21_MAP_H
-#define INCLUDE_S21_MAP_H
+#ifndef INCLUDE_S21_MAP_H_
+#define INCLUDE_S21_MAP_H_
 
 #include <initializer_list>
 #include <memory>
@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>  // delete it
 
-#include "s21_avl_tree.h"
+#include "./s21_avl_tree.h"
 
 namespace s21 {
 
@@ -158,8 +158,10 @@ class map final {
   }
 
 #ifdef DEBUG
+
  public:
   int verify(void) const { return tree_.verify(); }
+
 #endif  // DEBUG
 
  private:
@@ -168,4 +170,4 @@ class map final {
 
 }  // namespace s21
 
-#endif  // INCLUDE_S21_MAP_H
+#endif  // INCLUDE_S21_MAP_H_
