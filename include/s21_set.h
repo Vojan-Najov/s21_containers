@@ -1,14 +1,14 @@
 // Copyright 2023 <Carmine Cartman, Vojan Najov>
 
-#ifndef INCLUDE_S21_SET_H
-#define INCLUDE_S21_SET_H
+#ifndef INCLUDE_S21_SET_H_
+#define INCLUDE_S21_SET_H_
 
 #include <initializer_list>
 #include <memory>
 #include <utility>
 #include <vector>  // delete it
 
-#include "s21_avl_tree.h"
+#include "./s21_avl_tree.h"
 
 namespace s21 {
 
@@ -114,8 +114,10 @@ class set final {
   }
 
 #ifdef DEBUG
+
  public:
   int verify(void) const { return tree_.verify(); }
+
 #endif  // DEBUG
 
  public:
@@ -124,4 +126,4 @@ class set final {
 
 }  // namespace s21
 
-#endif  // INCLUDE_S21_SET_H
+#endif  // INCLUDE_S21_SET_H_
