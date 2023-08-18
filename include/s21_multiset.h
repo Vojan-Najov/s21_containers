@@ -1,14 +1,14 @@
 // Copyright 2023 <Carmine Cartman, Vojan Najov>
 
-#ifndef INCLUDE_S21_MULTISET_H
-#define INCLUDE_S21_MULTISET_H
+#ifndef INCLUDE_S21_MULTISET_H_
+#define INCLUDE_S21_MULTISET_H_
 
 #include <initializer_list>
 #include <memory>
 #include <utility>
 #include <vector>  // delete it, or replace on s21_vector
 
-#include "s21_avl_tree.h"
+#include "./s21_avl_tree.h"
 
 namespace s21 {
 
@@ -145,8 +145,10 @@ class multiset final {
   }
 
 #ifdef DEBUG
+
  public:
   int verify(void) const { return tree_.verify(); }
+
 #endif  // DEBUG
 
  private:
@@ -155,4 +157,4 @@ class multiset final {
 
 }  // namespace s21
 
-#endif  // INCLUDE_S21_MULTISET_H
+#endif  // INCLUDE_S21_MULTISET_H_
