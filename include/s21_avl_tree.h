@@ -7,7 +7,7 @@
 #include <iterator>
 #include <utility>
 
-#include "./s21_utils.h"
+#include "s21_utils.h"
 
 namespace s21 {
 
@@ -152,7 +152,7 @@ class AvlTreeIterator final : public AvlTreeIteratorBase<ValueType> {
 template <typename ValueType>
 inline bool operator==(const AvlTreeIterator<ValueType>& lhs,
                        const AvlTreeIterator<ValueType>& rhs) {
-  return lhs.Base::node_ == rhs.Base::node_;
+  return lhs.node_ == rhs.node_;
 }
 
 template <typename ValueType>
@@ -213,7 +213,7 @@ class AvlTreeConstIterator final : public AvlTreeIteratorBase<ValueType> {
 template <typename ValueType>
 inline bool operator==(const AvlTreeConstIterator<ValueType>& lhs,
                        const AvlTreeConstIterator<ValueType>& rhs) {
-  return lhs.Base::node_ == rhs.Base::node_;
+  return lhs.node_ == rhs.node_;
 }
 
 template <typename ValueType>
