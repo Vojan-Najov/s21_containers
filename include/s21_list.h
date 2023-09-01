@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <initializer_list>
 #include <iterator>
-#include <limits>
+#include <memory>
 
 namespace s21 {
 
@@ -440,11 +440,11 @@ inline size_t list<T>::size(void) const noexcept {
 
 template <typename T>
 inline size_t list<T>::max_size(void) const noexcept {
-#ifdef __linux__
-  return std::numeric_limits<size_type>::max() / 2 / sizeof(ListNode<T>);
-#else   // __linux__
-  return std::numeric_limits<size_type>::max() / sizeof(ListNode<T>);
-#endif  // __linux__
+  /*
+   *  return std::numeric_limits<size_type>::max() / 2 / sizeof(ListNode<T>);
+   */
+
+  return std::allocator<ListNode<T>>().max_size();
 }
 
 // list: modifiers
