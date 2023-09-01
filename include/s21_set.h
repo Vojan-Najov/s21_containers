@@ -6,9 +6,9 @@
 #include <initializer_list>
 #include <memory>
 #include <utility>
-#include <vector>  // delete it
 
-#include "./s21_avl_tree.h"
+#include "s21_avl_tree.h"
+#include "s21_vector.h"
 
 namespace s21 {
 
@@ -97,13 +97,13 @@ class set final {
   bool contains(const_reference key) const { return tree_.contains(key); }
 
  public:
-  std::vector<std::pair<iterator, bool>> insert_many(void) {
-    return std::vector<std::pair<iterator, bool>>();
+  vector<std::pair<iterator, bool>> insert_many(void) {
+    return vector<std::pair<iterator, bool>>();
   }
 
   template <typename... Args>
-  std::vector<std::pair<iterator, bool>> insert_many(Args&&... args) {
-    std::vector<std::pair<iterator, bool>> vec;
+  vector<std::pair<iterator, bool>> insert_many(Args&&... args) {
+    vector<std::pair<iterator, bool>> vec;
     vec.reserve(sizeof...(args));
 
     for (auto&& arg : {args...}) {
